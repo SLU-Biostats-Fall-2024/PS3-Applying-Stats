@@ -26,6 +26,8 @@ bats <- read.csv(here("Data", "bat_data.csv"))
 glimpse(bats) # allows us to see the data type for each column
 ```
 
+Glimpsing the data shows us the number of rows, number of columns, column names, data type, and first few entries of each column. This is helpful because we need to know which data types to alter.
+
 ## Change character into factor variables:
 
 ```{r}
@@ -56,9 +58,10 @@ ggplot(bats, aes(x=mass_g)) +
   geom_histogram() +
   facet_wrap(~Species, ncol=1)
 # create a histogram of the mass of bats for each species
+# `ncol=1` causes the histograms to be stacked on top of each other
 ```
 
-The average body mass for EPFU appears to be around 21 grams. The average body mass for LACI appears to be around 28 g. The average body mass for LANO appears to be around 16 g. The average body mass for MYLU appears to be around 11 g. The average body mass for PESU appears to be around 7 g. I believe that there will be a significant difference in the mean mass between the species of bats. Each histogram appears to be normally distributed.
+The average body mass for EPFU appears to be around 22 grams. The average body mass for LACI appears to be around 28 g. The average body mass for LANO appears to be around 14 g. The average body mass for MYLU appears to be around 11 g. The average body mass for PESU appears to be around 6 g. I believe that there will be a significant difference in the mean mass between the species of bats. Each histogram appears to be normally distributed.
 
 **Step 2) Create a linear model:**
 
@@ -91,9 +94,9 @@ Run an ANOVA test to see if there is a significant difference in average mass in
 anova(mass_model)
 ```
 
-We run an ANOVA test because we have a ratio response variable (mass_g), a categorical predictor variable (Species), the samples are indepenedent because the weight of one species has no effect on the weight of another species, and there are more than 2 groups to compare.
+We run an ANOVA test because we have a ratio response variable (mass_g), a categorical predictor variable (Species), the samples are independent because the weight of one species has no effect on the weight of another species, and there are more than 2 groups to compare.
 
-The ANOVA test shows us that there is a significant difference in mass between bat species (F_4,120=792.9, pvalue \< .001).
+The ANOVA test shows us that there is a significant difference in mass between bat species (F_4,120=792.9, p-value \< .001).
 
 Run the summary:
 
@@ -161,7 +164,7 @@ length_model <- lm(body_length_mm ~ Species, data = bats)
 autoplot(length_model, smooth.color=NA)
 ```
 
-he first plot shows us the residuals vs fitted which tells us if our data is a linear model. The blue line is pretty straight so it looks good.
+The first plot shows us the residuals vs fitted which tells us if our data is a linear model. The blue line is pretty straight so it looks good.
 
 The normal Q-Q plot shows us if our data meets the requirements for normality. Most of the points fall on or close to the line so that looks good.
 
@@ -177,9 +180,9 @@ Run an ANOVA test to see if there is a significant difference in average body le
 anova(length_model)
 ```
 
-We run an ANOVA test because we have a ratio response variable (body_length_g), a categorical predictor variable (Species), the samples are indepenedent because the length of one species has no effect on the weight of another species, and there are more than 2 groups to compare.
+We run an ANOVA test because we have a ratio response variable (body_length_g), a categorical predictor variable (Species), the samples are independent because the length of one species has no effect on the weight of another species, and there are more than 2 groups to compare.
 
-The ANOVA test shows us that there is a significant difference in average body length between each species (F_4,120=70.498, pvalue \< .001).
+The ANOVA test shows us that there is a significant difference in average body length between each species (F_4,120=70.498, p-value \< .001).
 
 Run a summary:
 
@@ -237,7 +240,7 @@ ggplot(tick_count, aes(sex, count, fill = age))+
   theme_bw() # plot the tick count by sex and fill by the age
 ```
 
-Looking at the plot, we can see that 32 is the number of ticks found on all the female adults, 35 for female subadults, 31 for male adults, and 26 for male subadults. I dont think there will be an association of ticks found on bats with their sex and age.
+Looking at the plot, we can see that 32 is the number of ticks found on all the female adults, 35 for female subadults, 31 for male adults, and 26 for male subadults. I don't think there will be an association of ticks found on bats with their sex and age.
 
 **Step 2) Turn data into a matrix:**
 
