@@ -4,3 +4,499 @@ format: html
 editor: visual
 ---
 
+## Intro:
+
+This document includes the data analysis for questions regarding the bats of northeastern North America.
+
+The questions are as follows:
+
+A. Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?
+
+B. Does body length differ between these five species of bats and, if so, how does body mass differ between the species?
+
+C. Is the number of ticks found on the bats associated with their sex or age?
+
+D. Disregarding species, is there a relationship in bats between tail length and body length?
+
+#### Species codes:
+
+*Eptesicus fuscus* (big brown bat): EPFU
+
+*Myotis lucifugus* (little brown bat): MYLU
+
+*Lasionycteris noctivagans* (silver-haired bat): LANO
+
+*Perimyotis subflavus* (eastern pipistrelle): PESU
+
+*Lasiurus cinereus* (hoary bat): LACI
+
+## Set up
+
+```{r}
+rm(list=ls()) # clear R's brain
+library(tidyverse)
+library(here)
+library(ggfortify)
+library(multcomp) # for tukey hsd
+```
+
+## Load in the data
+
+```{r}
+bat <- read.csv(here("Data", "bat_data.csv"))
+glimpse(bat) # take a look at the structure of the data
+```
+
+This data frame has 125 rows and 9 variables. The variables include 4 that are quantitative (either continuous or discrete) and 5 that are character data. These 5 character variables are categorical variables and their datatype should reflect this, except for common_name and type which can stay as character data (they will not be used in this analysis based on the questions given)
+
+Lets change the char variable to factors:
+
+## Error Checking and Changing Datatypes:
+
+Let's start with the categorical variables:
+
+#### 1) Species
+
+Change it to a factor and check the levels for errors:
+
+```{r}
+bat$Species <- as.factor(bat$Species)
+levels(bat$Species) # allows us to see the different groups
+```
+
+There are five species, so these data looks good (no errors.)
+
+#### 2) age
+
+Make it a factor and check for errors:
+
+```{r}
+bat$age <- as.factor(bat$age)
+levels(bat$age)
+```
+
+These data make sense.
+
+#### 3) sex
+
+```{r}
+bat$sex <- as.factor(bat$sex)
+levels(bat$sex)
+```
+
+Looks good!
+
+Let's move on to error checking the quantitative variables:
+
+We want to see if there are any outrageous values that would be subject to removal. Looking at the histogram of each variable will allow us to determine if there are any errors.
+
+#### 1) mass_g
+
+```{r}
+ggplot(bat, aes(mass_g))+
+  geom_histogram()+
+  theme_bw()
+```
+
+There don't seem to be any extreme outliers that would cause concern.
+
+#### 2) tick_num
+
+```{r}
+ggplot(bat, aes(tick_num))+
+  geom_histogram()+
+  theme_bw()
+```
+
+Looks good -- no crazy values.
+
+#### 3) body_length_mm
+
+```{r}
+ggplot(bat, aes(body_length_mm))+
+  geom_histogram()+
+  theme_bw()
+```
+
+Looks good.
+
+#### 4) tail_length_mm
+
+```{r}
+ggplot(bat, aes(tail_length_mm))+
+  geom_histogram()+
+  theme_bw()
+```
+
+Looks good.
+
+Now that all the variables we will be using in the analysis are the correct data type and error-free, we can move on to the data analysis work flow.
+
+## Investing the Questions;
+
+For each analysis, we will use the same workflow:
+
+plot your data → build the statistical model → Check the model assumptions → Interpret the model → Make a final plot
+
+But, before working through the analysis, we need to determine the correct type of analysis based on the datatypes of the variables.
+
+## Question A:
+
+Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?
+
+First, we have to determine what the correct plot and analysis that is required for these variables.
+
+Response variable: body mass, which is the mass_g variable in the data set.
+
+-   Variable data type: continuous ratio data.
+
+Predictor variable: five species of bat -- the Species variable in the data set
+
+-   Variable data type: nominal categorical data (with 5 levels)
+
+A boxplot is the most appropriate plot because we have multiple groups and the response is continuous (boxplot allows us to seet the distribution)
+
+The best analysis for this question is a one-way ANOVA because our response variable is continuous and we have more than 2 groups within the categorical variable.
+
+#### Plot
+
+Boxplot:
+
+```{r}
+ggplot(bat, aes(Species, mass_g))+
+  geom_boxplot(outlier.color = "red", outlier.size = 5)+ 
+  # will color points red if they are considered an outlier (outside these bounds): 
+  # Q1 - (1.5*IQR) or Q3 + (1.5*IQR)
+  geom_point(size=3, alpha = 0.5)+ # shows the points to allow us see where they land
+  theme_bw()
+```
+
+There does seem to be a distinguishable difference between the body masses of each species considering the relatively small spread of each group and difference in means. The estimated means (middle of the box) are as follows:
+
+-   EPFU (big brown bat): 21 g
+
+-   LACI (hoary bat): 27.5 g
+
+-   LANO (silver haired bat): 14 g
+
+-   MYLU (little brown bat): 11 g
+
+-   PESU (eastern pipistrelle): 5 g
+
+LACI is the largest bat by body mass followed by EPFU, LANO, MYLU, and PESU.
+
+There do seem to be three outliers identified in red. However, these point still reflect natural variation and there doesn't seem to be any reason to remove them.
+
+It is hard to say which groups will be different from each other, but I would expect that EPFU to be different from the others, as well as LACI. With the last three, they might not be different from each other, though maybe LANO is and the other two are considered not significantly different from eachother.
+
+#### Fit the model:
+
+For ANOVA we use `lm()`
+
+```{r}
+modms = lm(mass_g~Species, data = bat)
+```
+
+#### Check assumptions
+
+```{r}
+autoplot(modms)
+```
+
+These assumptions look good. The residuals vs. fits plot describes if a linear model is appropriate, and these points are sufficiently random (model looks appropriate.) The normal quantile plot checks the normality of residuals, and normal residuals will follow the line closely. These data look good because most residuals follow the line very closely until the very extreme points (the residuals are approximately normal.) The scale-location plot also needs to be random (not have a clear trend) and there doesn't seem to be any strong trend, which means the assumption of equal variance is met. The last plot just checks leverage and looks for any concern points, but there doesn't seem to be any that should be removed.
+
+Note: these same assumptions will be checked for the rest of the analyses (we will be looking for the same kinds of distributions for each graph.)
+
+#### Interpret the model
+
+```{r}
+anova(modms) # anova table that would be used in a publication
+summary(modms) # summary of model which has more information
+```
+
+Reject the null (no difference in means.) We have evidence that the bat species have discernibly different average body masses (g) ($F_{4,120} = 792.9,$ $p < 2.2 * 10^{-16}$)
+
+The summary shows the individual t-test that compare each species to the first group (EPFU,) but these tests are problematic due to multiplicity, so we will conduction a Tukey HSD pos hoc test to see which groups are different. However, we expect LACI to be have a significantly larger body mass than EPFU, and the others to be significantly smaller based on body mass.
+
+Tukey HSD:
+
+```{r}
+# we need a anova model to run the test:
+ams <- aov(mass_g~Species, data = bat) # same as original but in a form we can use for Tukey
+TukeyHSD(ams) # traditional test
+```
+
+Compact letter display:
+
+```{r}
+msthsd<- glht(modms, linfct = mcp(Species = "Tukey")) # object needed for display
+cld(msthsd)
+```
+
+Both from the traditional output and compact letter display we see that each species is significantly differet from all the other species. This means that mean body mass are discernibly different and their  average mass descends in this order: LACI, EPFU, LANO, MYLU, and PESU.
+
+
+#### Final Figure:
+
+(based on the figure from chapt 5 with some asethetic changes)
+
+For our final figure I want to display the actual means, so I need to calculate them here:
+
+```{r}
+summs <- bat |> group_by(Species) |> 
+  summarise(meanbm = mean(mass_g))
+```
+
+This plot will show the means and the distribution of points for each
+
+```{r}
+ggplot(bat,aes(Species, mass_g, colour = Species))+
+  geom_boxplot()+
+  geom_point(size = 3, alpha = .5)+
+  geom_point(data = summs, aes(Species, meanbm), shape = "diamond", size = 5, color = "black" )+ 
+  # the mean for each group will be displayed as a diamond
+  ylab("Body Mass (g)")+
+  theme_bw()
+```
+
+Formal interpretation: 
+
+We have sufficient evidence that the sampled bat species have discernibly different average body masses (g) ($F_{4,120} = 792.9,$ $p < 2.2 * 10^{-16}$). Due to a significant Tukey HSD test (p = 0), we found that each species' mean body mass was significantly different from every other species tested, with this order: LACI > EPFU > LANO > MYLU > PESU.
+
+
+## Question B:
+
+Does body length differ between these five species of bats and, if so, how does body
+length differ between the species?
+
+Following the same procedure, we first need to determine the correct statistical test and plot.
+
+Again, the species (predictor) variable is categorical with 5 groups.
+
+body_length_mm (response variable) contains quantitative data, which are technically discrete, but are a measurement rather than counts data (should be treated as continuous data.)
+
+This is the same situation as before: we will use a ANOVA and boxplots because we have a quantitative response variable and more than two groups within a categorical variable.
+
+#### Plot
+
+```{r}
+ggplot(bat, aes(Species, body_length_mm))+
+  geom_boxplot(outlier.color = "red", outlier.size = 5)+ 
+  geom_point(size=3, alpha = 0.5)+ # shows the points to allow us see where they land
+  theme_bw()
+```
+
+These species are in a similar arragement to the body mass comparison. Longest body length is LACI with a mean of about 148 mm, followed by EPFU (appox. mean of 125 mm), then LANO (approx. 110 mm), MYLU (approx. 102 mm), and last PESU (appox. 87 mm.) It is hard to say whether each species will be statitically different from every other group, but I think each group will be different than the other excepet possibly, MYLU and PESU might be found not to be statistically different. Again there are some outliers, but they seem to be a result of natural variation.
+
+#### Fit the model:
+
+```{r}
+modbls <- lm(body_length_mm ~ Species, data = bat)
+```
+
+
+#### Check assumptions
+
+```{r}
+autoplot(modbls)
+```
+
+Assumptions look good. Residuals vs. fits: the linear model seems appriate. Normal quantile plot: the points follow the line closely (normal residuals.) Scale-location plot: no trend (equal variance.) Additionally, the leverage plot doesn't have any points that seem unreasonable.
+
+
+#### Interpret the model
+
+```{r}
+anova(modbls)
+summary(modbls)
+```
+
+Reject the null. We have statistically significant evidence that the mean body length (mm) is different among the species tested ($F_{4, 120} = 70.498$, $p < 2.2 * 10^{-16}$).
+
+Based on the individual t-tests, LACI > EPFU > LANO > MYLU > PESU in terms of mean body length, but we must conduct a Tukey HSD test to be sure.
+
+```{r}
+# need an aov() for TukeyHSD:
+abls <- aov(body_length_mm ~ Species, data = bat)
+TukeyHSD(abls)
+```
+
+Compact letter display:
+
+```{r}
+blsthsd<- glht(modbls, linfct = mcp(Species = "Tukey")) # object needed for display
+cld(blsthsd)
+```
+
+We see (from the output and display) that all the groups are statistically discernible from each other except MYLU and PESU. Their mean body lengths comparatively: LACI > EPFU > MYLU and PESU.
+
+
+#### Final Figure:
+
+Same figure as the first question with the means (in black) and points displayed over the boxplot.
+
+Means:
+
+```{r}
+sumbls <- bat |> group_by(Species) |> 
+  summarise(meanbl = mean(body_length_mm))
+```
+
+Plot:
+
+```{r}
+ggplot(bat,aes(Species, body_length_mm, colour = Species))+
+  geom_boxplot()+
+  geom_point(size = 3, alpha = .5)+
+  geom_point(data = sumbls, aes(Species, meanbl), shape = "diamond", size = 5, color = "black" )+ 
+  # the mean for each group will be displayed as a diamond
+  ylab("Body Length (mm)")+
+  theme_bw()
+```
+
+We have statistically discernible evidence that there is a difference in mean body length (mm) among the species tested ($F_{4, 120} = 70.498$, $p < 2.2 * 10^{-16}$). Due to a significant Tukey HSD test (p << 0.05), all the species were statistically different from each other except MYLU and PESU, where no difference was observed. The mean body lengths are as follows: LACI > EPFU > LANO > MYLU & PESU.
+
+
+## Question C:
+
+Is the number of ticks found on the bats associated with their sex or age?
+
+The response is tick_num, which is discrete count data.
+
+The two predictors are sex and age which are both binary categorical variables.
+
+Since we are using two different categorical predictors, and the response variable is discrete counts data, the most appropriate statistical test is a $\chi^2$ test for independence. The best graph is a bar graph because the response variable is count data.
+
+#### Plot
+
+Use a bar graph with colors based on the total count of ticks for each combination of sex and age.
+
+We need a data frame with these totals first:
+
+```{r}
+total_ticks <- bat |> group_by(sex, age) |> 
+  summarise(sumt = sum(tick_num))
+View(total_ticks)
+```
+
+Bar graph:
+
+```{r}
+ggplot(total_ticks, aes(sex, sumt, fill = age))+ 
+# sex will be on the x axis and the colors will be coded based on age
+  geom_bar(stat = "identity", position = "dodge")+ # bars will appear side by side
+  theme_bw()
+```
+
+Ticks seem to be the most common on adult males than any other combination of the groups. There seems to be a slight preference for males regardless of age, but overall there seems to be a relatively equal distribution of ticks among sex and age of bats, so I expect there will be no significant difference.
+
+
+#### Check assumptions
+
+The $\chi^2$ test has different assumptions than the linear models and these have to do with mutually exclusive categories (which is true in this case) and random sampling (which we assume is true.) So, there is no plot used to check these assumptions.
+
+
+#### Interpret Test
+
+There is also no model associated with this test, but we need to convert the total_ticks data into a matrix so that we can run the test.
+
+```{r}
+(bat_mat <- xtabs(tick_num ~ sex + age, data = bat))
+```
+Looks good -- these totals look the same as the plot.
+
+Now we are ready to run the $\chi^2$ test.
+
+```{r}
+chisq.test(bat_mat)
+```
+
+Failed to reject the null hypothesis. We found no statistically discernible difference in ticks found on bats based on their sex or age ($\chi^2_1 = 0.33718$, p = 0.5615).
+
+#### Final Figure:
+
+The same plot as before, but with more formal axes titles.
+
+```{r}
+ggplot(total_ticks, aes(sex, sumt, fill = age))+ 
+# sex will be on the x axis and the colors will be coded based on age
+  geom_bar(stat = "identity", position = "dodge")+ # bars will appear side by side
+  ylab("Total Number of Ticks")+
+  xlab("Sex")+
+  theme_bw()
+```
+
+We tested if there was an association between the number of ticks found on bats and their sex and age and we found no statistically different number of ticks among these groups ($\chi^2_1 = 0.33718$, p = 0.5615).
+
+
+## Question D:
+
+Disregarding species, is there a relationship in bats between tail length and body length?
+
+Response variable: tail length quantitative data. While these data are technically discrete, these are a measure, and therefore do not make sense as counts or frequency data.
+
+Predictor Variable: body length is also quantitative and should be treated as a continuous variable as these measurements on a continuous scale (even though the numbers themselves appear to be discrete).
+
+The appropriate test is a linear regression because we have two quantitative variables. The best plot is a scatterplot for the same reason.
+
+
+#### Plot
+
+Scatterplot:
+
+```{r}
+ggplot(bat, aes(body_length_mm, tail_length_mm))+
+  geom_point()+
+  theme_bw()
+```
+
+There is a clear strong linear trend with these data where the longer the body length (mm) the longer the tail (positive correlation.) The slope appears to be approximately 0.5 and the intercept seems to be around 12.5. Since the data follow such a tight linear trend, I expect there to be a significant slope and a large $R^2$ value.
+
+
+#### Fit the model
+
+```{r}
+modbltl <- lm(tail_length_mm ~ body_length_mm, data = bat)
+```
+
+
+#### Check assumptions
+
+Same assumptions are present for linear regression as with ANOVA:
+
+We will use the same group of plots to check them.
+
+```{r}
+autoplot(modbltl)
+```
+
+Looks good. Residuals vs. fits looks sufficiently random, as well as th scale-location graph (linear fit and equal variance.) The points are very linear in the normal quantile plot, implying normal residuals. Also, there don't seem to be any concerning points in the residuals vs. leverage plot. With the assumptions met, we can move onto testing our model.
+
+
+#### Interpret the model
+
+```{r}
+summary(modbltl)
+```
+
+Reject the null. We have statistically discernible evidence that, with the bats sampled, as body length (mm) increases, tail length increases ($F_{1,123} = 1037$, adj $R^2 = 0.8931$, p < $2.2 * 10^{-16}$). The slope of the regression line that predicts tail length using body length is significantly larger than zero ($\beta$ = 0.614, p < $2.2 * 10^{-16}$).
+
+
+#### Final Figure:
+
+Plot the regression line onto the scatter plot:
+
+```{r}
+ggplot(bat, aes(body_length_mm, tail_length_mm))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  xlab("Body Length (mm)")+
+  ylab("Tail Length (mm)")+
+  theme_bw()
+```
+
+Linear regression model: $\widehat{Tail Length} = -14.837 + 0.614(Body Length)$
+
+We have statistically discernible evidence that the overall regression model was significant; as body length (mm) increases, tail length also probable to increase ($F_{1,123} = 1037$, adj $R^2 = 0.8931$, p < $2.2 * 10^{-16}$). Also, the slope of the regression line that predicts tail length using body length is significantly larger than zero ($\beta$ = 0.614, p < $2.2 * 10^{-16}$).
+
+
