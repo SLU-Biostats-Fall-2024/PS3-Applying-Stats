@@ -1,0 +1,239 @@
+---
+title: "Bazuro-PS3"
+author: "Andrew Bazuro"
+format: html
+editor: visual
+---
+# Read in packages and data
+```{r}
+rm(list = ls())
+library(tidyverse)
+library(here)
+library(ggfortify)
+library(multcomp)
+bat <- read.csv(here("Data", "bat_data.csv"))
+```
+## Examine dataset
+```{r}
+##use the following command to examine the dataset.
+glimpse(bat)
+
+##the Species, common_name, age, sex, and type variables all appear to be categorical so I will read them in as factors.
+bat$Species <- as.factor(bat$Species)
+bat$common_name <- as.factor(bat$common_name)
+bat$age <- as.factor(bat$age)
+bat$sex <- as.factor(bat$sex)
+bat$type <- as.factor(bat$type)
+
+glimpse(bat)
+```
+
+#Question 1
+A. Does body mass differ between these five species of bats and, if so, how does body
+mass differ between the species?
+
+##Null Hypothesis
+Our null hypothesis is: There is no difference in mean body mass for bats between species.
+
+## Plot
+Here I am plotting the data to estimate the means and to look for any outliers.
+```{r}
+ggplot(data = bat, aes(x = Species, y = mass_g)) +
+  geom_boxplot(outlier.color = "red") + ##colors any outliers in red +
+  theme_bw()
+```
+Species with the highest mean is the `LACI` with a mean of 26. `EPFU` is the next highest with a mean of 21. Then `LANO` with a mean of 14, `MYLU` with a mean of 11, and `PESU` with a mean of 7.5. While I do see some outliers they are near the averages for the data and don't appear to be drastically changing it so I will leave them in.
+
+##Model
+Based on the continuous response variable and the categorical predictor with more than two groups to compare I will be running an anova. As such, here I am creating the model for the anova.
+```{r}
+mod1 = lm(mass_g ~ Species, data = bat)
+```
+
+##Check conditions
+I will now use the  `autoplot()` to check the conditions before starting analysis
+```{r}
+autoplot(mod1)
+```
+Based on these plots the only points exerting a large effect on the data are points 25 and 26. However, the normality plot is mostly following the line and the leverage is mostly flat. As such, I won't be removing any data and will continue on with the analysis.
+
+##Run Test and summary
+I will now run the `anova()` function to examine the species
+```{r}
+anova(mod1)
+```
+Here we see that there is a significant difference in the data (although not where it specifically is). I will now run the summary table to see between which species there are significant differences.
+
+```{r}
+summary(mod1)
+```
+The means are shown to be around where I found them to be, with `LACI` at 26, `EPFU` at 20, `LANO` at 14, `MYLU` at 10, and `PESU` at 7. I will now run a Tukey HSD test to compare differences between all of the group means to see where there is a significant difference.
+```{r}
+phc1 <- glht(mod1, linfct = mcp(Species = "Tukey"))
+summary(phc1) #shows differences and p-values in list format.
+cld(phc1) #shows the species with different letters
+```
+Based on the Tukey HSD we can see that there is a significant difference between all group means.
+
+##Answer
+Based on our analysis we can reject the null hypothesis that there is no significant difference between each of the group means as they are all significantly different from one another, with `LACI` having the highest mean body mass, `EPFU` having the next greatest, then `LANO`, then `MYLU`, and finally `PESU` with the lowest mean body mass.
+
+##Final figure
+```{r}
+ggplot(data = bat, aes(x = Species, y = mass_g)) +
+  geom_boxplot() +
+  geom_point() + 
+  theme_bw()
+```
+
+#Question 2
+B. Does body length differ between these five species of bats and, if so, how does body
+length differ between the species?
+
+##Null Hypothesis
+Our null hypothesis is that there will be no significant difference between the mean body lengths of each species.
+
+##Plot
+Here I am plotting the data to estimate the means and to look for any outliers.
+```{r}
+ggplot(data = bat, aes(x = Species, y = body_length_mm)) +
+  geom_boxplot(outlier.color = "red") +
+  theme_bw()
+```
+Since I see several outliers I will be removing them as there are several and they may affect the means/significance.
+```{r}
+batQ2 = bat |> mutate(body_length_mm = if_else(Species == "LANO" &
+                                                 body_length_mm >= 140, 
+                                                      true = NA, 
+                                                      false = body_length_mm))##sets any point which is from the species LANO and has a body length of 140 or greater and sets it to NA. Sets all values which are false to be the same as before.
+batQ2 = batQ2 |> mutate(body_length_mm = if_else(Species == "LANO" &
+                                                 body_length_mm <= 70, 
+                                                      true = NA, 
+                                                      false = body_length_mm))
+batQ2 = batQ2 |> mutate(body_length_mm = if_else(Species == "EPFU" &
+                                                 body_length_mm >= 150, 
+                                                      true = NA, 
+                                                      false = body_length_mm))
+batQ2 = batQ2 |> mutate(body_length_mm = if_else(Species == "MYLU" &
+                                                 body_length_mm <= 70, 
+                                                      true = NA, 
+                                                      false = body_length_mm))
+```
+
+Updated plot without outliers
+```{r}
+ggplot(data = batQ2, aes(x = Species, y = body_length_mm)) +
+  geom_boxplot(outlier.color = "red") +
+  theme_bw()
+```
+The species with the highest mean body length is `LACI` which has a mean length of 142. Next is `EPFU` with a mean length of 120, then `LANO` with a mean length of 108, then `MYLU` with a mean length of 95, then finally `PESU` with a mean length of 85.
+
+##Model
+I will now create the model for the test. I will be using an anova as there is once again a continous response variable with a categorical variable with more than 2 groups.
+```{r}
+mod2 <- lm(body_length_mm ~ Species, data = batQ2)
+```
+
+##Check conditions
+I will check the condition using the `autoplot()` function.
+```{r}
+autoplot(mod2)
+```
+While there are some points exerting a larger influence on the data (26, 46, and 45) there doesn't appear to be any issues with the normality or equal variance so I will be proceeding with the analysis.
+
+##Run test and summary
+
+I will now run the `anova()` function to examine the species
+```{r}
+anova(mod2)
+```
+Here we see that there is a significant difference in the data (although not where it specifically is). I will now run the summary table to see between which species there are significant differences, as well as what the relative means are.
+
+```{r}
+summary(mod2)
+```
+The means are shown to be around where I found them to be, with `LACI` at 145, `EPFU` at 121, `LANO` at 105, `MYLU` at 90, and `PESU` at 80. I will now run a Tukey HSD test to compare differences between all of the group means to see where there is a significant difference.
+
+```{r}
+phc2 <- glht(mod2, linfct = mcp(Species = "Tukey"))
+summary(phc2) #shows differences and p-values in list format.
+cld(phc2) #shows the species with different letters
+```
+Based on the Tukey HSD we can see that there is a significant difference between all group means except for MYLU and PESU, which are not significant from one another.
+
+##Answer
+
+Based on our analysis we can reject the null hypothesis that there is no significant difference between each of the group means as there are some that are significantly different from one another, with `LACI` having the highest mean body length, `EPFU` having the next greatest, then `LANO`, then `MYLU`, and finally `PESU` with the shortest mean body length.
+
+##Final Figure
+```{r}
+ggplot(data = batQ2, aes(x = Species, y = body_length_mm)) +
+  geom_boxplot() +
+  theme_bw()
+```
+
+#Question 3
+C. Is the number of ticks found on the bats associated with their sex or age?
+
+##Null Hypothesis
+
+Our null hypothesis is that there is no association between the number of ticks found on a bat and their sex and age.
+
+##Plot
+
+Here I am plotting the data to examine the means and to see if there are any outliers.
+This is looking at association between two groups for a discrete response variable. S0 I will be making a dataframe with the count data and plotting that in preparation ofr a chi-square test. 
+```{r}
+totals <- bat |> group_by(sex, age) |> summarise(total.number = sum(tick_num))
+totals
+```
+
+I will use the count data to create a barplot so that I can examine the counts relative to one another.
+
+```{r}
+ggplot(totals, aes(x = sex, y = total.number, fill = age))+
+     geom_bar(stat = "identity", position = "dodge")
+```
+Based on the plot, the highest number of ticks are found on adult male bats, with the next highest being subadult males, then adult females, then subadult females. Based on this I would expect to reject the null hypothesis.
+
+##Model
+
+```{r}
+bat.mat <- xtabs(tick_num ~ sex + age, data = bat) #creates a matrix for the chisq.test() function as we need a matrix to run it.
+bat.mat
+```
+##Run test and summary
+
+Now we can run the test by using the matrix we created earlier.
+```{r}
+chisq.test(bat.mat)
+```
+##Answer
+
+Based on our analysis (χ2 = 0.33718, df = 1, p = 0.5615) we fail to reject the null hypothesis that there is no association between the number of ticks found on bats and their age and sex.
+
+##Final Figure
+
+#Question 4
+D. Disregarding species, is there a relationship in bats between tail length and body length?
+##Null Hypothesis
+Our null hypothesis is that there is no relationship between the tail length and body length of the bats.
+##Plot
+Here I am plotting the data to estimate the means and intercept of the data.
+```{r}
+ggplot(data = bat, aes(x = tail_length_mm, y = body_length_mm)) +
+  geom_point() +
+  theme_bw()
+```
+Based on this plot the intercept the intercept appears to be somewhere around 40 while the slope is around 1/2 as there is a point at y = 60 and x = 25, as well as at y = 148 and x = 73.
+
+##Model
+I will be using a linear regression for this analysis as the two variables are both continous and we are looking to see if there is a relationship.
+```{r}
+mod4 = lm(tail_length_mm ~ body_length_mm, data = bat)
+```
+
+##Check conditions
+##Run test and summary
+##Answer
+##Final Figure
