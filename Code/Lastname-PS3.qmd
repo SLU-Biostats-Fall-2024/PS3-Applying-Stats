@@ -1,6 +1,0 @@
----
-title: "Problem Set 3 - Statistics"
-format: html
-editor: visual
----
-
