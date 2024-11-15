@@ -1,0 +1,419 @@
+---
+title: "Problem Set 3"
+format: html
+editor: visual
+---
+
+# Problem Set 3
+
+## Set up
+
+```{r}
+rm(list=ls()) #Clear environment
+#Install necessary packages
+library(here) 
+library(tidyverse)
+library(ggfortify)
+library(multcomp)
+```
+
+Read in the data:
+
+```{r}
+bats <- read.csv(here("Data", "bat_data.csv")) 
+#Read in the data and assign it the object called bats
+```
+
+## Looking at data
+
+```{r}
+glimpse(bats) 
+#Look at the data and see if need to change any data types
+```
+
+I need to change the character data of common_name, age, sex, and type to factor data. I'm not going to change species because it lines up with common name so it's not necessary to use both in the analysis I'll be doing.
+
+Overall I can see that Species/common name, age, sex, and type are all categorical data, and mass_g, tick_num, body_length_mm, and tail_length_mm are all continuous ratio data.
+
+```{r}
+#Change each of the variables to factor data:
+bats$common_name <- as.factor(bats$common_name)
+
+bats$age <- as.factor(bats$age)
+
+bats$sex <- as.factor(bats$sex)
+
+bats$type <- as.factor(bats$type)
+
+glimpse(bats) #Check that the changes worked
+```
+
+Check for any errors in the data:
+
+```{r}
+levels(bats$common_name) #Looks good
+levels(bats$age) #good
+levels(bats$sex) #good
+levels(bats$type) #good
+```
+
+## Analysis A
+
+*Question: Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?*
+
+For this question the response variable is body mass (mass_g), and the predictor variable is the species of bat, in this case that variable will be common_name. Body mass is ratio data, and common name is categorical. Following the flow chart for determining the correct statistical test, I can follow the path with the question of 'is there a difference between group means' then yes for 'are samples independent.' Then I arrive at the number of groups to compare. This has more than 2 groups to compare as there are 5 species of bats, meaning I'll be running a 1-way ANOVA test.
+
+### First, plots
+
+I'll make a box and whiskers plot. This will be good to see the distribution of body mass between the five species.
+
+```{r}
+ggplot(bats, aes(x=common_name, y=mass_g))+
+  geom_boxplot()+
+  theme_bw()
+
+#Use the bats dataframe. Have common name as the x variable and mass as the y variable. Make a boxplot and remove the background. 
+```
+
+This plot clearly illustrates a difference in means between the five species. There is not overlap between the boxes of any of the species. Big brown bat and hoary bat have a much higher body mass than the eastern pipistrelle, little brown bat, and silver-haired bat.
+
+Estimations of body mass means (g):
+
+Big brown bat - 21
+
+Eastern pipistrelle - 5
+
+Hoary bat - 27
+
+Little brown bat - 10.5
+
+Silver-haired bat - 14.5
+
+Degrees of freedom - (5-1) = 4
+
+### Build the model
+
+Use the linear model function to build the model to use in the ANOVA.
+
+```{r}
+model.bats <- lm(mass_g ~ common_name, data=bats)
+```
+
+### Test Assumptions
+
+Use `autoplot()` to see how well model assumptions are met.
+
+```{r}
+autoplot(model.bats, smooth.colour = NA)
+```
+
+This looks good - the first graph has a flat line with no dips or humps. The Normal Q-Q plot is centered closely on the line. The scale-location plot line is pretty flat. There aren't any points that seem to have a significant influence in the fourth plot.
+
+### Run the ANOVA
+
+Use the `anova()` function to get an Analysis of Variance Table to answer the first part about whether body mass differs between the five species.
+
+```{r}
+anova(model.bats)
+```
+
+Based on the table, we can conclude that there is a statistically significant difference in the body masses of the five species of bats (F\[4, 120\] = 792.9, p\<\<0.001).
+
+Because there's no control variable to compare groups to, the `summary()` function is not very helpful because it only compares to one level with treatment contrasts. Instead I'm going to run a Tukey HSD test to answer the question of how body mass differs between species.
+
+However, `summary()` is still useful for determining the actual means!
+
+```{r}
+summary(model.bats)
+```
+
+Here the big brown bat is the intercept, so it's mean is 20.5320. We can then determine the means for the other species based on their difference from this reference.
+
+Eastern pipistrelle - 7.408
+
+Hoary bat - 27.36
+
+Little brown bat - 10.412
+
+Silver-haired bat - 14.468
+
+Here I'll run the Tukey HSD test to answer the question of how body mass differs between species.
+
+```{r}
+Tukey.bats <- glht(model.bats, linfct = mcp(common_name="Tukey"))
+#This sets up the Tukey test and tells it the proper variable to use
+```
+
+```{r}
+summary(Tukey.bats) #Get the results of the Tukey test
+```
+
+Because the above display is confusing, I can use the code below to tell the significant differences based on letters with the compact letter display function `cld()`.
+
+```{r}
+cld(Tukey.bats)
+```
+
+The results from this show that there is a significant difference in body mass between all five of the species.
+
+## Analysis B
+
+*Question: Does body length differ between these five species of bats and, if so, how does body length differ between the species?*
+
+This is another one-way ANOVA test to run. Body length is the response variable and it is continuous ratio data. Species is categorical data. I want to test if there's a difference in group means between the categories, and the samples are independent. There are 5 groups to compare, so I should run an ANOVA.
+
+### First, plots
+
+I'll make a boxplot to easily compare the means between the groups.
+
+```{r}
+ggplot(bats, aes(x=common_name, y=body_length_mm))+
+  geom_boxplot()+
+  theme_bw()
+```
+
+From the boxplot I think that there will be a significant difference between most if not all of the groups. Little brown bat and silver-haired bat are closest in means but still seem pretty distinct.
+
+[Estimated means of body length (mm):]{.underline}
+
+Big brown bat - 123
+
+Eastern pipistrelle - 82
+
+Hoary bat - 147
+
+Little brown bat - 100
+
+Silver-haired bat - 110
+
+Degrees of freedom - (5-1)=4
+
+### Build the model
+
+Use `lm` to build the model for use in the ANOVA test.
+
+```{r}
+model.length <- lm(body_length_mm ~ common_name, data = bats)
+```
+
+### Test assumptions
+
+Make sure that the data looks good to use.
+
+```{r}
+autoplot(model.length, smooth.colour = NA)
+```
+
+From these plots I can see that data looks good to use. The residuals vs fitted is straight and evenly distributed, the Normal Q-Q is centered on the slope, Scale-location is flat and evenly distributed, residuals vs factors doesn't have any stand-out points.
+
+### Run the ANOVA
+
+Use `anova` to answer the first part of the question - whether there is a difference between the groups.
+
+```{r}
+anova(model.length)
+```
+
+Based on the results of the Analysis of Variance table, I can conclude that there is a significant difference in the body lengths between the five species (F\[4, 120\]=70.498, p\<\<0.001).
+
+Next I'll use `summary()` to find the actual means of each group.
+
+```{r}
+summary(model.length)
+```
+
+Once again, the intercept is the big brown bat, with an average body length of 123.4mm.
+
+Eastern pipistrelle - 83.88
+
+Hoary bat - 146.04
+
+Little brown bat - 92.36
+
+Silver-haired bat - 106.68
+
+Now I'll run the Tukey HSD to find the answer to the second part of the question - how body mass differs between the species.
+
+```{r}
+Tukey.length <- glht(model.length, linfct=mcp(common_name = "Tukey"))
+```
+
+Use `summary()` to get the results.
+
+```{r}
+summary(Tukey.length)
+```
+
+Because this is hard to understand, use compact letter display for easier interpretation of results.
+
+```{r}
+cld(Tukey.length)
+```
+
+We can conclude that there is no significant difference in group mean body length (mm) between the eastern pipistrelle and little brown bat (both received the letter b). There is a significant difference between all the other species, and those two species with all the others.
+
+## Analysis C
+
+*Questions: Is the number of ticks found on the bats associated with their sex or age?*
+
+For this question the response variable is the number of ticks (continuous ratio), and there are two predictor variables: sex and age (both categorical).
+
+For this question I'll want to run a two sample t-test. This is because I am using a ratio response and categorical predictors and testing if there's a difference in group means with independent samples. There's only 2 groups to compare, so I run a two-sample t-test.
+
+My null hypothesis will be that there's no difference in the number of ticks based on sex. And there's no difference in the number of ticks based on age.
+
+### T-test for Sex
+
+#### First, plots
+
+I'll start with a histogram to compare number of ticks between the two groups of sex.
+
+```{r}
+ggplot(bats, aes(x=tick_num))+
+  geom_histogram()+
+  facet_wrap(~sex, ncol=1)+ #group based on sex and stack the two histograms for easy comparison
+  theme_bw()
+```
+
+From this histogram it looks like the sex does have a relationship with number of ticks, as males seem to have more ticks than females overall.
+
+#### Means
+
+Now I'll calculate the means and standard errors:
+
+```{r}
+mean.ticks.sex <- bats |>
+  group_by(sex) |>
+  summarise(mean.ticks.sex = mean(tick_num, na.rm = T), 
+            stdev.ticks.sex = sd(tick_num, na.rm =T)) 
+```
+
+Based on these means I think there will be a significant difference. Females have 4.402985 ticks, and males have 6.29313.
+
+#### Run the t-test
+
+```{r}
+t.test(tick_num ~ sex, data=bats)
+```
+
+Our results show that there is a significant difference (t=-10.608, df = 117.45, p\<\< 0.001) between the mean tick numbers between the male and female groups, so we can reject the null hypothesis. The male bats have significantly more ticks than the female bats.
+
+### T-test for Age
+
+#### First, plots
+
+I'll use a histogram again to see the differences in tick numbers by age.
+
+```{r}
+ggplot(bats, aes(x=tick_num))+
+  geom_histogram()+
+  facet_wrap(~age, ncol=1)+ #group based on sex and stack the two histograms for easy comparison
+  theme_bw()
+```
+
+This histogram does not look as obvious in difference as the sex histogram. I predict that there will be a significant difference, but it will be small.
+
+#### Means
+
+Here I'll calculate the means and standard errors to further guess whether there will be a difference.
+
+```{r}
+mean.ticks.age <- bats |>
+  group_by(age) |>
+  summarise(mean.ticks.age = mean(tick_num, na.rm = T), 
+            stdev.ticks.age = sd(tick_num, na.rm =T)) 
+```
+
+Adults mean is 5.476190
+
+Subadults mean is 5.080645
+
+Based off these numbers I'm reevaluating to think there won't be a significant difference.
+
+#### Run the t-test
+
+```{r}
+t.test(tick_num ~ age, data=bats)
+```
+
+Our results show that there is not a significant difference (t=1.6291, df = 122.01, p=0.1059) in mean number of ticks between adult and subadult bats, so we do not reject the null hypothesis.
+
+Overall for analysis C we can say that sex is associated with the number of ticks found on bats, but age is not.
+
+## Analysis 4
+
+*Question: Disregarding species, is there a relationship in bats between tail length and body length?*
+
+For this question, tail length is the predictor variable and body length is the response variable. These are both continuous ratio data, and the question being asked is if there's a relationship between the variables. There's only one predictor variable, so I end up at regression for the test.
+
+The null hypothesis is that there's no relationship between tail length and body length.
+
+### First, plot
+
+For a regression I'll use a scatterplot because both axes are continuous.
+
+```{r}
+ggplot(bats, aes(x=tail_length_mm, y=body_length_mm))+
+     geom_point()+
+     theme_bw()
+```
+
+This scatterplot shows a positive slope.
+
+The y axis (rise) goes from 60 to 178 (diff is 118)
+
+The x axis (run) goes from 10 to 99 (diff is 89)
+
+Slope is 118/89 = 1.325843
+
+Y-intercept looks to be around 35
+
+### Make the model
+
+Set up the model for use in running the regression. It's the same `lm()` as is used for the ANOVA.
+
+```{r}
+model.tail.body <- lm(body_length_mm ~ tail_length_mm, data=bats)
+```
+
+Then check the assumptions with `autoplot()`
+
+```{r}
+autoplot(model.tail.body, smooth.colour = NA)
+```
+
+These plots all look good - the first is flat and even, the second is tight to the line, the third is evenly distributed, the fourth doesn't show any major outliers, although there are some that deviate from the main group.
+
+### Run the regression
+
+Now make a sums of squares model with `anova`
+
+```{r}
+anova(model.tail.body)
+```
+
+From here we can see to reject the null hypothesis that there's no relationship between the two variables (F\[1, 123\]=1037.2, p\<\<0.001). The small p-value tells us that the slope is very different from 0.
+
+There is a significant relationship between tail length and body length (F\[1, 123\]=1037.2, p\<\<0.001).
+
+```{r}
+summary(model.tail.body)
+```
+
+This tells us that the slope of the model is 1.45498, close to my original estimate.
+
+The y-intercept is 33.2999, also close to my guess.
+
+The adjusted R-squared is 0.8931 which tells us that about 89% of the variation in body length is related to tail length, a very high influence of predictor on response.
+
+### Make a new plot with a regression line
+
+```{r}
+ggplot(bats, aes(x=tail_length_mm, y=body_length_mm))+
+     geom_point()+
+  geom_smooth(method = "lm")+
+     theme_bw()
+
+```
+
+Here is the same scatterplot as before but with a regression line of best fit.
