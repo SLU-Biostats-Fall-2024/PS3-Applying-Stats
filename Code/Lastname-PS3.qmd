@@ -229,85 +229,50 @@ I reject the null hypothesis that mean body mass does not differ between these f
 
 ## **3. Is the number of ticks found on the bats associated with their sex or age?**
 
-To figure this out, I'll first plot this proposed relationship, knowing that sex and age (the predictors) are categorical while tick count (the response) is a continuous variable, so I'll use a histogram, and will later run a two-way anova?
+To figure this out, I'll first plot this proposed relationship, knowing that sex and age (the predictors) are categorical while tick count (the response) is a discrete variable, so I'll use a histogram, and will later run a chi square
+
+prep the data for plotting
+
+```{r}
+sumbats3<-bats%>%
+  group_by(sex, age)%>%
+  summarise(total =sum(tick_num))
+sumbats3
+```
 
 lets plot the data for now
 
 ```{r}
-
-ggplot(bats, aes(x = tick_num, fill = sex,width=0.9)) + 
-  geom_bar(position="dodge")+
-  facet_wrap(~ age) + 
-  theme_bw()
-
-```
-
-This graph is not very intuitive to read, but shows the variation across tick numbers well.
-
-```{r}
-ggplot(bats,aes(x=age,y=tick_num))+
-  geom_point()+
-  geom_boxplot()+
-  facet_wrap(vars(sex))+
+ggplot(sumbats3, aes(x = sex, y=total,fill=age)) + 
+  geom_bar(stat='identity',position="dodge")+
   theme_bw()
 ```
 
-Here, it looks like there is a difference in mean tick num between males and females, but not between adults and subadults
+In these graphs, it looks like there is a significant difference in mean tick num between males and females, but not between adults and subadults
 
-next, lets calculate mean and sd for all combinations
-
-```{r}
-sumbats<-bats%>%
-  group_by(sex, age)%>%
-  summarise(meanbats =mean(tick_num))
-sumbats
-```
-
-yes, this confirms that the mean ticks appear different between sex, but not age
-
-Next, I'll build my statistical model. Since I'm going to run an ANOVA, I'll need to start with a linear model with an interaction
+Next, I'll build my statistical model. Since I'm going to run a x\^2 test, I'll need a matrix, so i'll use xtabs()
 
 ```{r}
-bats.MOD3 <- lm(tick_num~sex*age, data=bats)
+bats.mat<-xtabs(tick_num~sex+age,data=bats)
+bats.mat
 ```
 
-I'll need to check my assumptions before running any tests
+next, i can use the matrix to run the x\^2 test
 
 ```{r}
-autoplot(bats.MOD3, smooth.colour=NA)
+chisq.test(bats.mat)
 ```
-
-These look slightly more questionable than the previous, but nothing too alarming.A linear model is appropriate, there is normality in the data, there is even variance, and no points with major leverage.
-
-Now I can move onto my tests
-
-```{r}
-anova(bats.MOD3)
-```
-
-The variation explained by sex is 111.063, while the variation explained by age and the interaction variable are both \<3. The sex variable has a p value of \<2e-16, suggesting we reject our hypothesis.
 
 Lets make a new plot and conclude
 
 ```{r}
-
-sumbats3<-bats%>%
-  group_by(sex, age)%>%
-  summarise(
-    meanbats = mean(tick_num),
-    sebats=sd(tick_num)/sqrt(n())
-    )
-sumbats3
-
-ggplot(sumbats3,aes(x=age,y=meanbats,colour=sex))+
-  geom_point(size=2)+
-  geom_errorbar(aes(ymin=meanbats-sebats,ymax=meanbats+sebats,width=0.7))+
+ggplot(sumbats3,aes(x=sex,y=meanbats, fill=age))+
+  geom_bar(stat='identity',position="dodge")+
+  geom_errorbar(aes(ymin=meanbats-sebats,ymax=meanbats+sebats,width=0.2))+
   theme_bw()
-
-
 ```
 
-I reject the null hypothesis that the number of ticks found on the bats is not associated with either their sex or age. Further analysis suggests that the number of ticks found on the bats is associated with their sex (F=116.6779, df=1, p\<2e-16). Meanwhile, there is no significant impact of age nor a sex/age interaction on tick number in this model (F=2.7431,df=1,p=0.1003), (F=2.4668,df=1,p=0.1189)
+I do not reject the null hypothesis that the number of ticks found on the bats is not associated with either their sex or age (X-squared = 0.33718, df = 1, p-value = 0.5615).
 
 ## **4. Disregarding species, is there a relationship in bats between tail length and body length?**
 
