@@ -5,12 +5,11 @@ date: Nov/22/2024
 format: html
 editor: visual
 ---
-
 # Problem Set 3
 
 ## Here I will demonstrate everything I have learned about basic statistical analysis using R
 
-Workflow model to follow: plot data (and guess the results) → build the statistical model → Check the model assumptions → Interpret the model → Make a final plot
+My workflow model to follow: plot data (and guess the results) → build the statistical model → Check the model assumptions → Interpret the model → Make a final plot
 
 In this project, I will examine data featuring 5 species of bats and use some data analysis to learn more.
 
