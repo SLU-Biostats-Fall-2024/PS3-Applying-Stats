@@ -5,6 +5,7 @@ date: Nov/22/2024
 format: html
 editor: visual
 ---
+
 # Problem Set 3
 
 ## Here I will demonstrate everything I have learned about basic statistical analysis using R
@@ -111,8 +112,6 @@ anova(bats.MOD)
 
 Woooop! We have a (very) significant p value.
 
-I reject the null hypothesis that mean body mass does not differ between these five species of bats, and suggest that at least one of the species correlates with a different mean body mass (DF120,4, F=792.9, p\<2.2e-16).
-
 Okay, great! But how does body mass differ between the species?
 
 I'll have to run a post-hoc test to find out.
@@ -133,7 +132,7 @@ cld(PHC1)
 
 Cool! This tells us that each of the species are statistically different in means of mass.
 
-Let's make a final model to wrap up
+Let's make a final model and conclusion to wrap up
 
 ```{r}
 sumbats1<-bats%>%
@@ -149,6 +148,8 @@ ggplot(sumbats1,aes(x=Species,y=mass_g,colour=Species))+
   geom_errorbar(aes(ymin=meanbats-sebats,ymax=meanbats+sebats))+
   theme_bw()
 ```
+
+I reject the null hypothesis that mean body mass does not differ between these five species of bats, and suggest each species correlates with a different mean body mass (F=792.9, dF120,4, p\<2.2e-16).
 
 ## **2. Does body length differ between these five species of bats and, if so, how does body mass differ between the species?**
 
@@ -187,8 +188,6 @@ anova(bats.MOD2)
 
 Woooop! We have a (very) significant p value.
 
-I reject the null hypothesis that mean body mass does not differ between these five species of bats, and suggest that at least one of the species correlates with a different mean body mass (DF120,4, F=70.498, p\<2.2e-16).
-
 Okay, great! But how does body length differ between the species?
 
 I'll have to run a post-hoc test to find out.
@@ -207,9 +206,9 @@ I could do an interpretation here, but it is a lot of information to take in, so
 cld(PHC2)
 ```
 
-Ahhh, this is what I suspected. There is a statistically signficant difference in body length between each of the species other than MYLU and PESU!
+Ahhh, this is what I suspected. All are different other than MYLU and PESU!
 
-New model time!
+New model and conclusion time!
 
 ```{r}
 sumbats2<-bats%>%
@@ -225,6 +224,8 @@ ggplot(sumbats2,aes(x=Species,y=body_length_mm,colour=Species))+
   geom_errorbar(aes(ymin=meanbats-sebats,ymax=meanbats+sebats))+
   theme_bw()
 ```
+
+I reject the null hypothesis that mean body mass does not differ between these five species of bats, and suggest that there is a statistically signficant difference in body length between each of the species other than MYLU and PESU (F=70.498, dF120,4, p\<2.2e-16).
 
 ## **3. Is the number of ticks found on the bats associated with their sex or age?**
 
@@ -284,7 +285,9 @@ Now I can move onto my tests
 anova(bats.MOD3)
 ```
 
-The variation explained by sex is 111.063, while the variation explained by age and the interaction variable are both \<3. The sex variable has a p value of \<2e-16, suggesting we reject our hypothesis that the number of ticks found on the bats is not associated with either their sex or age. Further analysis suggests that the number of ticks found on the bats is associated with their sex, while there is no significant impact of age nor a sex/age interaction on tick number in this model (F=116.6779, df=1, p\<2e-16), (F=2.7431,df=1,p=0.1003), (F=2.4668,df=1,p=0.1189)
+The variation explained by sex is 111.063, while the variation explained by age and the interaction variable are both \<3. The sex variable has a p value of \<2e-16, suggesting we reject our hypothesis.
+
+Lets make a new plot and conclude
 
 ```{r}
 
@@ -303,6 +306,8 @@ ggplot(sumbats3,aes(x=age,y=meanbats,colour=sex))+
 
 
 ```
+
+I reject the null hypothesis that the number of ticks found on the bats is not associated with either their sex or age. Further analysis suggests that the number of ticks found on the bats is associated with their sex (F=116.6779, df=1, p\<2e-16). Meanwhile, there is no significant impact of age nor a sex/age interaction on tick number in this model (F=2.7431,df=1,p=0.1003), (F=2.4668,df=1,p=0.1189)
 
 ## **4. Disregarding species, is there a relationship in bats between tail length and body length?**
 
@@ -341,9 +346,7 @@ summary(bats.MOD4)
 
 Woooop! We have a (very) significant p value.
 
-I reject the null hypothesis that mean body length and tail length have no relationship, and suggest that as body length increases, so does tail length (DF1,123,F=1037, p\<2.2e-16).'
-
-New graph
+New graph and conclusion here:
 
 ```{r}
 
@@ -352,3 +355,5 @@ ggplot(bats,aes(x=tail_length_mm,y=body_length_mm))+
   geom_smooth(method='lm')+
   theme_bw()
 ```
+
+I reject the null hypothesis that mean body length and tail length have no relationship, and suggest that as body length increases, so does tail length (F=1037, df1,123, p\<2.2e-16).
