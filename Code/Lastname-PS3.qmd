@@ -53,7 +53,7 @@ levels(bats$sex)
 levels(bats$type)
 ```
 
-These are clean- no mistakes!
+These are clean- no mistakes in entry!
 
 Now to check out the numeric variables - I want to ensure there are no odd outliers made by mistake
 
@@ -77,11 +77,9 @@ Again, nothing concerning in terms of outliers in the data
 
 Workflow model to follow: plot data (and guess the results) → build the statistical model → Check the model assumptions → Interpret the model → Make a final plot
 
-For each analysis that you perform, be sure to explain the nature of the predictor and response variables and why you selected the analysis method in your .qmd file.
+## **1. Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?**
 
-**1. Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?**
-
-To figure this out, I'll first plot this proposed relationship, knowing species (the predictor) is a categorical variable and mass (the response) is a continuous variable, so I'll use a boxplot, and will later run an ANOVA (there are 5 treatments of Species)
+To figure this out, I'll first plot this proposed relationship, knowing species (the predictor) is a categorical variable and mass (the response) is a continuous variable, so I'll use a boxplot, and will later run an ANOVA (there are 5 treatments of Species).
 
 ```{r}
 ggplot(bats,aes(x=Species,y=mass_g))+
@@ -114,7 +112,7 @@ anova(bats.MOD)
 
 Woooop! We have a (very) significant p value.
 
-I reject the null hypothesis that mean body mass does not differ between these five species of bats, and suggest that at least one of the species correlates with a different mean body mass (DF120,4, F=792.9, p<2.2e-16).
+I reject the null hypothesis that mean body mass does not differ between these five species of bats, and suggest that at least one of the species correlates with a different mean body mass (DF120,4, F=792.9, p\<2.2e-16).
 
 Okay, great! But how does body mass differ between the species?
 
@@ -136,7 +134,26 @@ cld(PHC1)
 
 Cool! This tells us that each of the species are statistically different in means of mass.
 
-**2. Does body length differ between these five species of bats and, if so, how does body mass differ between the species?** \^I'm quite sure this was supposed to say body length twice
+Let's make a final model to wrap up
+
+```{r}
+sumbats1<-bats%>%
+  group_by(Species)%>%
+  summarise(
+    meanbats = mean(mass_g),
+    mass_g=mass_g,
+    sebats=sd(mass_g)/sqrt(n())
+  )
+
+ggplot(sumbats1,aes(x=Species,y=mass_g,colour=Species))+
+  geom_point()+
+  geom_errorbar(aes(ymin=meanbats-sebats,ymax=meanbats+sebats))+
+  theme_bw()
+```
+
+## **2. Does body length differ between these five species of bats and, if so, how does body mass differ between the species?**
+
+I'm pretty sure this was supposed to say body **length** twice
 
 To figure this out, I'll first plot this proposed relationship, knowing that species (the predictor) is a categorical variable and body length (the response) is a continuous variable, so I'll use a boxplot, and will later run an ANOVA (there are 5 treatments of Species)
 
@@ -171,7 +188,7 @@ anova(bats.MOD2)
 
 Woooop! We have a (very) significant p value.
 
-I reject the null hypothesis that mean body mass does not differ between these five species of bats, and suggest that at least one of the species correlates with a different mean body mass (DF120,4, F=70.498, p<2.2e-16).
+I reject the null hypothesis that mean body mass does not differ between these five species of bats, and suggest that at least one of the species correlates with a different mean body mass (DF120,4, F=70.498, p\<2.2e-16).
 
 Okay, great! But how does body length differ between the species?
 
@@ -193,10 +210,39 @@ cld(PHC2)
 
 Ahhh, this is what I suspected. There is a statistically signficant difference in body length between each of the species other than MYLU and PESU!
 
+New model time!
 
-**3\. Is the number of ticks found on the bats associated with their sex or age?**
+```{r}
+sumbats2<-bats%>%
+  group_by(Species)%>%
+  summarise(
+    meanbats = mean(body_length_mm),
+    body_length_mm = body_length_mm,
+    sebats=sd(body_length_mm)/sqrt(n())
+  )
 
-To figure this out, I'll first plot this proposed relationship, knowing that sex and age (the predictors) are categorical while tick count (the response) is a continuous variable, so I'll use a histogram, and will later run a two way anova? 
+ggplot(sumbats2,aes(x=Species,y=body_length_mm,colour=Species))+
+  geom_point()+
+  geom_errorbar(aes(ymin=meanbats-sebats,ymax=meanbats+sebats))+
+  theme_bw()
+```
+
+## **3. Is the number of ticks found on the bats associated with their sex or age?**
+
+To figure this out, I'll first plot this proposed relationship, knowing that sex and age (the predictors) are categorical while tick count (the response) is a continuous variable, so I'll use a histogram, and will later run a two-way anova?
+
+lets plot the data for now
+
+```{r}
+
+ggplot(bats, aes(x = tick_num, fill = sex,width=0.9)) + 
+  geom_bar(position="dodge")+
+  facet_wrap(~ age) + 
+  theme_bw()
+
+```
+
+This graph is not very intuitive to read, but shows the variation across tick numbers well.
 
 ```{r}
 ggplot(bats,aes(x=age,y=tick_num))+
@@ -205,24 +251,33 @@ ggplot(bats,aes(x=age,y=tick_num))+
   facet_wrap(vars(sex))+
   theme_bw()
 ```
+
 Here, it looks like there is a difference in mean tick num between males and females, but not between adults and subadults
 
-Next, I'll build my statistical model. Since I'm going to run an ANOVA, I'll need to start with a linear model
+next, lets calculate mean and sd for all combinations
 
 ```{r}
-bats.MOD3 <- lm(tick_num~sex+age, data=bats)
+sumbats<-bats%>%
+  group_by(sex, age)%>%
+  summarise(meanbats =mean(tick_num))
+sumbats
+```
+
+yes, this confirms that the mean ticks appear different between sex, but not age
+
+Next, I'll build my statistical model. Since I'm going to run an ANOVA, I'll need to start with a linear model with an interaction
+
+```{r}
+bats.MOD3 <- lm(tick_num~sex*age, data=bats)
 ```
 
 I'll need to check my assumptions before running any tests
 
 ```{r}
-autoplot(bats.MOD3)
+autoplot(bats.MOD3, smooth.colour=NA)
 ```
 
 These look slightly more questionable than the previous, but nothing too alarming.A linear model is appropriate, there is normality in the data, there is even variance, and no points with major leverage.
-
-
-# stopped above
 
 Now I can move onto my tests
 
@@ -230,4 +285,71 @@ Now I can move onto my tests
 anova(bats.MOD3)
 ```
 
-4\. Disregarding species, is there a relationship in bats between tail length and body length?
+The variation explained by sex is 111.063, while the variation explained by age and the interaction variable are both \<3. The sex variable has a p value of \<2e-16, suggesting we reject our hypothesis that the number of ticks found on the bats is not associated with either their sex or age. Further analysis suggests that the number of ticks found on the bats is associated with their sex, while there is no significant impact of age nor a sex/age interaction on tick number in this model (F=116.6779, df=1, p\<2e-16), (F=2.7431,df=1,p=0.1003), (F=2.4668,df=1,p=0.1189)
+
+```{r}
+
+sumbats3<-bats%>%
+  group_by(sex, age)%>%
+  summarise(
+    meanbats = mean(tick_num),
+    sebats=sd(tick_num)/sqrt(n())
+    )
+sumbats3
+
+ggplot(sumbats3,aes(x=age,y=meanbats,colour=sex))+
+  geom_point(size=2)+
+  geom_errorbar(aes(ymin=meanbats-sebats,ymax=meanbats+sebats,width=0.7))+
+  theme_bw()
+
+
+```
+
+## **4. Disregarding species, is there a relationship in bats between tail length and body length?**
+
+To figure this out, I'll first plot this proposed relationship, knowing that tail length and body length are continuous variables, so I'll use a scatterplot, and will later run a linear regression model.
+
+```{r}
+ggplot(bats,aes(x=tail_length_mm,y=body_length_mm))+
+  geom_point()+
+  theme_bw()
+```
+
+Oooh! There appears to be a strong positive relationship. (180-60)/(100-11)=120/89 = 1.35 I estimate the slope to be \~1.35 and the y intercept to be around 30.
+
+Next, I'll build my statistical model. Since I'm going to run an ANOVA, I'll need to start with a linear model
+
+```{r}
+bats.MOD4 <- lm(body_length_mm~tail_length_mm, data=bats)
+bats.MOD4
+```
+
+So, here the slope is 1.455 and the y-int is 33.300. My guesses weren't too far off!
+
+I'll need to check my assumptions before running any tests
+
+```{r}
+autoplot(bats.MOD4)
+```
+
+These charts look good! A linear model is appropriate, there is normality in the data, there is even variance, and no points with major leverage.
+
+Now I can move onto my tests
+
+```{r}
+summary(bats.MOD4)
+```
+
+Woooop! We have a (very) significant p value.
+
+I reject the null hypothesis that mean body length and tail length have no relationship, and suggest that as body length increases, so does tail length (DF1,123,F=1037, p\<2.2e-16).'
+
+New graph
+
+```{r}
+
+ggplot(bats,aes(x=tail_length_mm,y=body_length_mm))+
+  geom_point()+ 
+  geom_smooth(method='lm')+
+  theme_bw()
+```
