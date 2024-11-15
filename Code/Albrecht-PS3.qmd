@@ -7,22 +7,7 @@ editor: visual
 
 ## Background
 
-looking at rates of tick parasitism in 5 species of Northeast bats
-
-caught 25 bats of each species
-
-### questions 
-
-A. Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?
-
-\
-B. Does body length differ between these five species of bats and, if so, how does body mass differ between the species?
-
-\
-C. Is the number of ticks found on the bats associated with their sex or age?
-
-\
-D. Disregarding species, is there a relationship in bats between tail length and body length?
+This dataset looks at the rates of tick parasitism in 5 species of bats found in the Northeastern US.
 
 ## Setting up 
 
@@ -48,7 +33,7 @@ preview the data
 glimpse(bats)
 ```
 
-This dataframe consists of 125 entries of 9 variables. scientific name(species), common_name, age, sex, and type are all categorical. tick_num is discrete whilst data.mass, body_length_mm, and tail_length_mm are continuous. \`RFe
+This dataframe consists of 125 entries of 9 variables. scientific name(species), common_name, age, sex, and type are all categorical. tick_num is discrete whilst data.mass, body_length_mm, and tail_length_mm are continuous.
 
 ## Checking Data for Mistakes
 
@@ -142,7 +127,7 @@ ggplot(bats, aes(mass_g))+
   theme_bw()
 ```
 
-There seems to be a difference between the mass of species. The hoary bat seems to me the heaviest, followed the big brown bat, silver-haired bat, little brown bat, the smallest being the eastern pipistrelle.
+There seems to be a difference between the mass of species. The hoary bat seems to be the heaviest, followed the big brown bat, silver-haired bat, little brown bat, the smallest being the eastern pipistrelle.
 
 Now we need to see if these differences are statistically significant.
 
@@ -166,7 +151,7 @@ All of these outputs look good. I can now move onto running the **analysis**. In
 anova(bat_mass_model)
 ```
 
-The F value is large and the p-value is small and therefore we can reject our null hypothesis that there is no difference in mass between speices.
+The F value is large and the p-value is small and therefore we can reject our null hypothesis that there is no difference in mass between species.
 
 ```{r}
 summary(bat_mass_model)
@@ -187,7 +172,7 @@ cld(phc1)
 
 Different letters demonstrate significant differences.
 
-**Results statement:** We found a significant difference between the average body mass of all 5 species. The hoary bat is the heaviest followed by big brown bat, silver-haired bat, little brown bat, and lastly the eastern pipistrelle. (Tukey, df=4, F=792.9 , p=0.000
+**Results statement:** We found a significant difference between the average body mass of all 5 species. The hoary bat is the heaviest followed by big brown bat, silver-haired bat, little brown bat, and lastly the eastern pipistrelle. (Tukey, df=4, F=792.9 , p=0.000)
 
 **Make a final plot**
 
@@ -213,7 +198,7 @@ ggplot(bats, aes(body_length_mm))+
   theme_bw()
 ```
 
-There appears to be variation of body lengths across speices. The hoary bat seems to be the longest, followed by the big brown bat, silver-haired bat, little brown bat, and lastly eastern pipistrelle.
+There appears to be variation of body lengths across speices. The hoary bat seems to be the longest, followed by the big brown bat, silver-haired bat, little brown bat, and lastly the eastern pipistrelle.
 
 **Create a model** to measure body length as a function of species.
 
@@ -221,7 +206,7 @@ There appears to be variation of body lengths across speices. The hoary bat seem
 bat_length_model <- lm(body_length_mm ~ common_name, data=bats)
 ```
 
-**check model assumptions**
+**Check model assumptions**
 
 ```{r}
 autoplot(bat_length_model)
@@ -229,7 +214,7 @@ autoplot(bat_length_model)
 
 looks good.
 
-Go ahead and run the analysis
+Go ahead and **run the analysis**
 
 ```{r}
 anova(bat_length_model)
@@ -241,7 +226,7 @@ summary(bat_length_model)
 
 We see that there is a significant difference between the average length of the big brown bat and the other 4 species.
 
-We want to see the exact relationships so we will conduct a pairwise comparison.
+We want to see the exact relationships across all of the other species as well so we will conduct a pairwise comparison using a tukey test.
 
 ```{r}
 phc2 <- glht(bat_length_model, linfct = mcp(common_name = "Tukey"))
@@ -254,11 +239,9 @@ cld(phc2)
 
 All of the species differ significantly in length to one another except for the eastern brown bat and eastern pipistrelle.
 
-**Results statement:** hj
+**Results statement:** We found significant differences in length between the different species of bats. (df=4, F=70.489, p=0.000) There was a significant difference in length compared between all bat species except for the little brown bat and eastern pipistrelle that were found to not be different from one another.(p=0.26221) The hoary bat was the longest followed by the big brown bat and silver-haired bat. The little brown bat and eastern pipistrelle we significantly shorter than the other three species but one was not significantly shorter/longer than the other.
 
-# look 
-
-**make final plot**
+**Make final plot**
 
 ```{r}
 ggplot(bats, aes(x=common_name, y=body_length_mm)) + 
@@ -276,6 +259,8 @@ To go about answering this question, I am actually going to perform 2 two-sample
 
 look at sex first, then age
 
+**SEX**
+
 **Initial plot**
 
 ```{r}
@@ -285,7 +270,7 @@ ggplot(bats, aes(tick_num))+
   theme_bw()
 ```
 
-It looks like male bats have more ticks on them
+It looks like male bats have more ticks on them. Lets move on ahead.
 
 **Make the model**
 
@@ -313,9 +298,9 @@ summary(bat_tick_sex)
 
 We are give a large F value and small p-value which allows us to reject our null hypothesis that there is no difference in tick numbers between sexes.
 
-Results statement: We found a signigicant difference between the mean nuber of of ticks found on the different sexes of bats, male bats having more than female ones. (df=1, F= 113.71 p= 0.000)
+Results statement: We found a significant difference between the mean nuber of of ticks found on the different sexes of bats, male bats having more than female ones. (df=1, F= 113.71 p= 0.000)
 
-Final plot
+**Final plot**
 
 ```{r}
 ggplot(bats, aes(x=sex, y=tick_num)) + 
@@ -364,7 +349,7 @@ summary(bat_tick_age)
 
 Our F value is small and our p-value is large (\>0.05). This does not allow us to reject our null hypothesis
 
-**Results statement:** We found no significant difference in number of ticks on subadult and adult bats. (df=1, F=2.6571, p=0.1056)
+**Results statement:** We found no significant difference in number of ticks on sub-adult and adult bats. (df=1, F=2.6571, p=0.1056)
 
 **Final plot**
 
@@ -380,9 +365,9 @@ ggplot(bats, aes(x=age, y=tick_num)) +
 
 **Question proposed:** Disregarding species, is there a relationship in bats between tail length and body length?
 
-linear regression - both ratio
+When looking for an association between two ratio data variables, we will use a linear regression to determine a significant relationship.
 
-initial graphing relationships
+**Plot relationships**
 
 ```{r}
 ggplot(bats, aes(x=body_length_mm, y=tail_length_mm)) +
@@ -392,7 +377,7 @@ ggplot(bats, aes(x=body_length_mm, y=tail_length_mm)) +
 
 **Preliminary interpretation**
 
-There is a positive linear relationship between body length and tail length
+There seems to be a positive linear relationship between body length and tail length
 
 Body length ranges from approximately 61 to 175 mm. Tail length seemingly ranges from 11 to 100 mm.
 
@@ -403,6 +388,8 @@ y = mx +b
 m= ((100-11)/(175-60)) = 89/115 = 0.774
 
 the estimated slope is 0.774
+
+the estimated intercept is about 14
 
 **Create model**
 
@@ -424,13 +411,17 @@ Looks good. All set to run analysis.
 anova(bat_length_model)
 ```
 
+The large F-value and small p-value indicates that we can reject our null hypothesis that there is no relationship between body length and tail length.
+
 ```{r}
 summary(bat_length_model)
 ```
 
-The large F-value and small p-value indicates that we can reject our null hypothesis that there is no relationship between body length and tail length.
+Our slope is 0.61443
 
-**Results statement:** We found a significant positive correlation between body length and tail length in bats (df=1, F=1037.2, p=0.000)
+The adjusted R-squared indicates the 89% of our points fit within out model
+
+**Results statement:** We found a significant positive correlation between body length and tail length in bats, that for every 1 mm increase in body length , tail length increases by 0.61443 mm. (df=1, F=1037.2, p=0.000)
 
 **Final plot**
 
