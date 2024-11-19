@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.33">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Problem Set 3 - Statistics</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="PS3-key_files/libs/clipboard/clipboard.min.js"></script>
+<script src="PS3-key_files/libs/quarto-html/quarto.js"></script>
+<script src="PS3-key_files/libs/quarto-html/popper.min.js"></script>
+<script src="PS3-key_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="PS3-key_files/libs/quarto-html/anchor.min.js"></script>
+<link href="PS3-key_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="PS3-key_files/libs/quarto-html/quarto-syntax-highlighting-07ba0ad10f5680c660e360ac31d2f3b6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="PS3-key_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="PS3-key_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="PS3-key_files/libs/bootstrap/bootstrap-fe6593aca1dacbc749dc3d2ba78c8639.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Problem Set 3 - Statistics</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="key-to-problem-set-3" class="level2">
+<h2 class="anchored" data-anchor-id="key-to-problem-set-3">Key to Problem Set 3</h2>
+<p>Let’s open with some general commentary about the assignment. Like this:</p>
+<p>This is the code for my Biostatistics Problem Set 3 on applying basic statistics. We have been given a data set with data about 5 different bat species and several questions to address, as follows:</p>
+<p>A. Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?</p>
+<p>B. Does body length differ between these five species of bats and, if so, how does body length differ between the species?</p>
+<p>C. Is the number of ticks found on the bats associated with their sex or age?</p>
+<p>D. Disregarding species, is there a relationship in bats between tail length and body length?</p>
+<p>Steps 1 - 3 of the assignment are to fork this project, create an RStudio project from the fork, create this .qmd file, etc. We’ll start here with Step 4, which is to write the code for the analysis. We were given this caveat:</p>
+<blockquote class="blockquote">
+<p>Remember to think about everything we learned BEFORE Chapter 5 of GSWR and include those steps in your workflow in addition to steps from Chapter 5. For each analysis that you perform, be sure to explain the nature of the predictor and response variables and why you selected the analysis method in your .qmd file.</p>
+</blockquote>
+<p>That hint is telling me that I better do some data exploration before I begin my analysis. I did not put any errors in the dataset, but it is a good idea to always check.</p>
+<p><em>Please note: I asked you to put all of your code in one .qmd, which is also what I’m doing here. For your capstone project, I’d like to see separate .qmd files for data exploration and a separate file for each statistical analysis.</em></p>
+<p>So, here we go:</p>
+<section id="set-up-load-the-data-and-examine-the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="set-up-load-the-data-and-examine-the-dataset">Set up, load the data, and examine the dataset</h3>
+<p>Let’s set up our workspace with the basic stuff:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(<span class="at">list =</span> <span class="fu">ls</span>())</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggfortify)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(multcomp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: mvtnorm
+Loading required package: survival
+Loading required package: TH.data
+Loading required package: MASS
+
+Attaching package: 'MASS'
+
+The following object is masked from 'package:dplyr':
+
+    select
+
+
+Attaching package: 'TH.data'
+
+The following object is masked from 'package:MASS':
+
+    geyser</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>here() starts at /Users/barthelmess/Library/CloudStorage/Dropbox/R/Classes/Biostats/PS3-Applying-Stats</code></pre>
+</div>
+</div>
+<p>Now let’s read in the dataset and take a look at it</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>bats <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">here</span>(<span class="st">"Data/bat_data.csv"</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(bats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 125
+Columns: 9
+$ Species        &lt;chr&gt; "EPFU", "EPFU", "EPFU", "EPFU", "EPFU", "EPFU", "EPFU",…
+$ common_name    &lt;chr&gt; "big brown bat", "big brown bat", "big brown bat", "big…
+$ age            &lt;chr&gt; "adult", "adult", "subadult", "subadult", "adult", "sub…
+$ sex            &lt;chr&gt; "male", "female", "female", "male", "female", "male", "…
+$ type           &lt;chr&gt; "cave", "cave", "cave", "cave", "cave", "cave", "cave",…
+$ mass_g         &lt;dbl&gt; 16.3, 16.9, 18.1, 18.7, 18.9, 18.9, 19.6, 19.7, 20.1, 2…
+$ tick_num       &lt;int&gt; 5, 6, 4, 6, 4, 7, 5, 6, 8, 4, 6, 6, 7, 4, 6, 7, 4, 5, 2…
+$ body_length_mm &lt;int&gt; 101, 103, 117, 109, 101, 123, 115, 105, 118, 120, 121, …
+$ tail_length_mm &lt;int&gt; 50, 48, 63, 54, 42, 67, 56, 44, 55, 58, 60, 71, 45, 53,…</code></pre>
+</div>
+</div>
+<p>I see that I have 125 rows of data and 9 variables. The first 5 variables, Species, common_name, age, sex, and type all represent categories of information and should be converted to factors. The remaining 4 variables are numeric.</p>
+<p>Let’s convert factor variables</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>bats<span class="sc">$</span>Species <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(bats<span class="sc">$</span>Species)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>bats<span class="sc">$</span>common_name <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(bats<span class="sc">$</span>common_name)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>bats<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(bats<span class="sc">$</span>age)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>bats<span class="sc">$</span>sex <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(bats<span class="sc">$</span>sex)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>bats<span class="sc">$</span>type <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(bats<span class="sc">$</span>type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and check their levels:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(bats<span class="sc">$</span>Species)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "EPFU" "LACI" "LANO" "MYLU" "PESU"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(bats<span class="sc">$</span>common_name)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "big brown bat"       "eastern pipistrelle" "hoary bat"          
+[4] "little brown bat"    "silver-haired bat"  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(bats<span class="sc">$</span>age)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "adult"    "subadult"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(bats<span class="sc">$</span>sex)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "female" "male"  </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">levels</span>(bats<span class="sc">$</span>type)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "cave" "tree"</code></pre>
+</div>
+</div>
+<p>There don’t appear to be any error in the factor variables. Phew.</p>
+<p>Now let’s take a look at the numeric variables with some histograms.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(mass_g))<span class="sc">+</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>()<span class="sc">+</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>common_name, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From this plot I see that there don’t really appear to be outliers, there does appear to be a difference in body mass by species, and the data appear to be fairly normally distributed (not too skewed either left or right).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(tick_num))<span class="sc">+</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>()<span class="sc">+</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>common_name, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From this I see that there don’t appear to be any real outliers (bats having b/w 2 and 8 ticks seems biologically reasonable) and there don’t appear to be differences between species.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(body_length_mm))<span class="sc">+</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>()<span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>common_name, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here I see that like for mass_g, the data appear to be fairly normally distributed and there appear to be difference in body length between species.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(tail_length_mm))<span class="sc">+</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>()<span class="sc">+</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>common_name, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here I see that again, tail length appears to be fairly normally distributed and there don’t appear to be any real outliers.</p>
+</section>
+<section id="question-a---does-body-mass-differ-between-these-5-species-of-bats-and-if-so-how-does-body-mass-differ-between-the-species" class="level3">
+<h3 class="anchored" data-anchor-id="question-a---does-body-mass-differ-between-these-5-species-of-bats-and-if-so-how-does-body-mass-differ-between-the-species">Question A - Does body mass differ between these 5 species of bats, and, if so, how does body mass differ between the species?</h3>
+<p>We will use our standard workflow: plot the data and guess the result -&gt; create the model -&gt; check the assumptions -&gt; interpret the model -&gt; plot a final figure.</p>
+<p>This question is asking us to look at body mass as a function of species, so body mass is the response variable and species is the predictor variable.</p>
+<p>Body mass is a continuous variable and species is a categorial variable with more than two groups, so my test should be a 1-way ANOVA.</p>
+<section id="make-the-plot-and-guess-the-outcome" class="level4">
+<h4 class="anchored" data-anchor-id="make-the-plot-and-guess-the-outcome">Make the plot and guess the outcome</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(common_name, mass_g))<span class="sc">+</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()<span class="sc">+</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>From the figure, it looks like there are significant differences in body mass between species. Hoary bats appear significantly larger (mean approx 27 g) than big brown bats (mean approx 21 g) who appear significantly larger than silver-haired bats (mean c.&nbsp;14.5 g) who appare signifcantly larger than little brown bats (mean c.&nbsp;11 g) who seem signficantly larger than eastern pipistrelles (mean c.&nbsp;7 g). I am expecting to find a signficant effect of species on body mass and in addition I’m expecting all species to be signficantly different from one another.</p>
+</section>
+<section id="create-the-model" class="level4">
+<h4 class="anchored" data-anchor-id="create-the-model">Create the model</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>mass.mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(mass_g <span class="sc">~</span> common_name, <span class="at">data =</span> bats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Note that you could also use Species as the predictor variable and you will get the same results. I used common_name because I don’t think most of you are familiar with bat scientific names.</p>
+</section>
+<section id="check-model-assumptions" class="level4">
+<h4 class="anchored" data-anchor-id="check-model-assumptions">Check model assumptions</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(mass.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here we see that the data have a pretty good but not perfect fit to our model assumptions. There are no real humps or valleys in the two left-hand plots, and the upper right-hand plot shows that most (but certainly not all - we’ll learn more when we learn <code>glm</code>) of the points fall on the line, so the data seem mostly to fit a normal distrubtion. So we’re going to accept that our data fit the assumptions adequately, for now.</p>
+</section>
+<section id="interpret-the-model" class="level4">
+<h4 class="anchored" data-anchor-id="interpret-the-model">Interpret the model</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(mass.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Response: mass_g
+             Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+common_name   4 6424.4 1606.11   792.9 &lt; 2.2e-16 ***
+Residuals   120  243.1    2.03                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Here we see that there is a highly significant effect of bat species (encoded as common_name) on body mass in bats. There are 4 df for common_name because there are 5 bat species so we are calculating n = 5 means, therefore df = n - 1 = 4. There are 120 residual (aka “error”) degrees of freedom becasue we have 125 rows of data and we used up 4 df for the common_name plus the one remaining df therefore 120 + 4 + 1 = 125 rows of data.</p>
+<p>So, we see a significant effect of species on body mass, but what about differences between species?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(mass.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = mass_g ~ common_name, data = bats)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-5.760 -0.760  0.132  0.840  4.368 
+
+Coefficients:
+                               Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                     20.5320     0.2846   72.13   &lt;2e-16 ***
+common_nameeastern pipistrelle -13.1240     0.4026  -32.60   &lt;2e-16 ***
+common_namehoary bat             6.8280     0.4026   16.96   &lt;2e-16 ***
+common_namelittle brown bat    -10.1200     0.4026  -25.14   &lt;2e-16 ***
+common_namesilver-haired bat    -6.0640     0.4026  -15.06   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.423 on 120 degrees of freedom
+Multiple R-squared:  0.9635,    Adjusted R-squared:  0.9623 
+F-statistic: 792.9 on 4 and 120 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>This <code>summary()</code> call shows us how the body mass of each species compares to the intercept, which is, in this case, the big brown bat (because “big” comes first in the alphabet). Your list might look different if you used Species as the predictor because the species codes may not fall in the same alphabetical order. So I can see here that every species has a signficiantly different body mass than the big brown bat.</p>
+<p>To see how all the species compare to one another, first let’s do a <code>group_by()</code> and <code>summarise()</code> and make a plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>bats <span class="sc">|&gt;</span> <span class="fu">group_by</span>(common_name) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_mass =</span> <span class="fu">mean</span>(mass_g, <span class="at">na.rm =</span> T),</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd_mass =</span> <span class="fu">sd</span>(mass_g, <span class="at">na.rm =</span> T)) <span class="sc">|&gt;</span> </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">View</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>They do look different (and I can see that the means are pretty close to what I guessed). Let’s do a tukey HSD test to check the differences.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>pct_mass <span class="ot">&lt;-</span> <span class="fu">glht</span>(mass.mod, <span class="at">linfct =</span> <span class="fu">mcp</span>(<span class="at">common_name =</span> <span class="st">"Tukey"</span>))</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pct_mass)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+     Simultaneous Tests for General Linear Hypotheses
+
+Multiple Comparisons of Means: Tukey Contrasts
+
+
+Fit: lm(formula = mass_g ~ common_name, data = bats)
+
+Linear Hypotheses:
+                                             Estimate Std. Error t value
+eastern pipistrelle - big brown bat == 0     -13.1240     0.4026 -32.602
+hoary bat - big brown bat == 0                 6.8280     0.4026  16.962
+little brown bat - big brown bat == 0        -10.1200     0.4026 -25.140
+silver-haired bat - big brown bat == 0        -6.0640     0.4026 -15.064
+hoary bat - eastern pipistrelle == 0          19.9520     0.4026  49.564
+little brown bat - eastern pipistrelle == 0    3.0040     0.4026   7.462
+silver-haired bat - eastern pipistrelle == 0   7.0600     0.4026  17.538
+little brown bat - hoary bat == 0            -16.9480     0.4026 -42.101
+silver-haired bat - hoary bat == 0           -12.8920     0.4026 -32.026
+silver-haired bat - little brown bat == 0      4.0560     0.4026  10.076
+                                             Pr(&gt;|t|)    
+eastern pipistrelle - big brown bat == 0       &lt;1e-10 ***
+hoary bat - big brown bat == 0                 &lt;1e-10 ***
+little brown bat - big brown bat == 0          &lt;1e-10 ***
+silver-haired bat - big brown bat == 0         &lt;1e-10 ***
+hoary bat - eastern pipistrelle == 0           &lt;1e-10 ***
+little brown bat - eastern pipistrelle == 0    &lt;1e-10 ***
+silver-haired bat - eastern pipistrelle == 0   &lt;1e-10 ***
+little brown bat - hoary bat == 0              &lt;1e-10 ***
+silver-haired bat - hoary bat == 0             &lt;1e-10 ***
+silver-haired bat - little brown bat == 0      &lt;1e-10 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+(Adjusted p values reported -- single-step method)</code></pre>
+</div>
+</div>
+<p>From this display, which shows each pairwise comparison of means (note the t-value: pairwise t-tests), I can see that each comparison has a highly signficant p-value.</p>
+<p>I can see a simplified version by using the “compact letter display” function <code>cld()</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cld</span>(pct_mass)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      big brown bat eastern pipistrelle           hoary bat    little brown bat 
+                "a"                 "b"                 "c"                 "d" 
+  silver-haired bat 
+                "e" </code></pre>
+</div>
+</div>
+<p>The fact that none of the species share the same letter tells me again that the mass of each species id significantly different from all other species.</p>
+</section>
+<section id="final-plot" class="level4">
+<h4 class="anchored" data-anchor-id="final-plot">Final plot</h4>
+<p>Let’s see if we can make a nice plot of these data. Do not worry about placing a letter value to indicate signficance on your plot. We’ll learn that in Chapter 8.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(common_name, mass_g, <span class="at">color =</span> common_name))<span class="sc">+</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()<span class="sc">+</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Bat species"</span>, <span class="at">y =</span> <span class="st">"Body mass (g)"</span>)<span class="sc">+</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()<span class="sc">+</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="results-statement" class="level5">
+<h5 class="anchored" data-anchor-id="results-statement">Results statement</h5>
+<p>Hoary bats are significantly heavier than big brown bats, who are significantly heavier than silver-haired bats, who are significantly heavier than little brown bats, who are significantly heavier than easter pipistrelle bats (F<sub>4,120</sub> = 792.9, p &lt;&lt;&lt; 0.001).</p>
+<p>Ok! Finished! On to question B!</p>
+</section>
+</section>
+</section>
+<section id="question-b---does-body-length-differ-between-these-5-species-of-bats-and-if-so-how-does-body-length-differ-between-the-species" class="level3">
+<h3 class="anchored" data-anchor-id="question-b---does-body-length-differ-between-these-5-species-of-bats-and-if-so-how-does-body-length-differ-between-the-species">Question B - Does body length differ between these 5 species of bats, and, if so, how does body length differ between the species?</h3>
+<p>Again I have a categorical predictor variable with 5 levels as the predictor and a continuous variable as the response variable, so I have a 1-way ANOVA.</p>
+<p>And again we will work through the analysis by plotting and guessing -&gt; creating the model -&gt; checking assumptions -&gt; interpreting the model -&gt; creating a final plot.</p>
+<p>I will go through some of this more quickly than for question A because the approach is exaclty the same.</p>
+<section id="plot-and-guess" class="level4">
+<h4 class="anchored" data-anchor-id="plot-and-guess">Plot and guess</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(common_name, body_length_mm))<span class="sc">+</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()<span class="sc">+</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Looks again like there is a significant difference among species in body lenght, but this time it is less clear if ther eis a difference between silver-haired, little brown and easetern pipistrelles.</p>
+<p>Approx means: - BBB = 121 - EP = 80 - HB = 142 - LBB = 90 - SHB = 107</p>
+</section>
+<section id="create-model" class="level4">
+<h4 class="anchored" data-anchor-id="create-model">Create model</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>length.mod <span class="ot">=</span> <span class="fu">lm</span>(body_length_mm <span class="sc">~</span> common_name, <span class="at">data =</span> bats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="check-assumptions" class="level4">
+<h4 class="anchored" data-anchor-id="check-assumptions">Check assumptions</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(length.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These data appear to be fine, and approach normality better than for body mass. #### Interpret model</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(length.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Response: body_length_mm
+             Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+common_name   4  62044   15511  70.498 &lt; 2.2e-16 ***
+Residuals   120  26403     220                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Species has a highly signficant effect on body length.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(length.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = body_length_mm ~ common_name, data = bats)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-45.68  -8.88  -0.40   9.32  39.32 
+
+Coefficients:
+                               Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                     123.400      2.967  41.596  &lt; 2e-16 ***
+common_nameeastern pipistrelle  -39.520      4.195  -9.420 4.15e-16 ***
+common_namehoary bat             22.640      4.195   5.396 3.48e-07 ***
+common_namelittle brown bat     -31.040      4.195  -7.398 2.06e-11 ***
+common_namesilver-haired bat    -16.720      4.195  -3.985 0.000116 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 14.83 on 120 degrees of freedom
+Multiple R-squared:  0.7015,    Adjusted R-squared:  0.6915 
+F-statistic:  70.5 on 4 and 120 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>Let’s make a plot</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>bats <span class="sc">|&gt;</span> <span class="fu">group_by</span>(common_name) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean_length =</span> <span class="fu">mean</span>(body_length_mm, <span class="at">na.rm =</span> T),</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd_length =</span> <span class="fu">sd</span>(body_length_mm, <span class="at">na.rm =</span> T)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> <span class="fu">View</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>From this view it looks like eastern pipistrelles and little brown bats may not differ from one another. Let’s check.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>pct_length <span class="ot">&lt;-</span> <span class="fu">glht</span>(length.mod, <span class="at">linfct =</span> <span class="fu">mcp</span>(<span class="at">common_name =</span> <span class="st">"Tukey"</span>))</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pct_length)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+     Simultaneous Tests for General Linear Hypotheses
+
+Multiple Comparisons of Means: Tukey Contrasts
+
+
+Fit: lm(formula = body_length_mm ~ common_name, data = bats)
+
+Linear Hypotheses:
+                                             Estimate Std. Error t value
+eastern pipistrelle - big brown bat == 0      -39.520      4.195  -9.420
+hoary bat - big brown bat == 0                 22.640      4.195   5.396
+little brown bat - big brown bat == 0         -31.040      4.195  -7.398
+silver-haired bat - big brown bat == 0        -16.720      4.195  -3.985
+hoary bat - eastern pipistrelle == 0           62.160      4.195  14.816
+little brown bat - eastern pipistrelle == 0     8.480      4.195   2.021
+silver-haired bat - eastern pipistrelle == 0   22.800      4.195   5.434
+little brown bat - hoary bat == 0             -53.680      4.195 -12.795
+silver-haired bat - hoary bat == 0            -39.360      4.195  -9.382
+silver-haired bat - little brown bat == 0      14.320      4.195   3.413
+                                             Pr(&gt;|t|)    
+eastern pipistrelle - big brown bat == 0      &lt; 1e-04 ***
+hoary bat - big brown bat == 0                &lt; 1e-04 ***
+little brown bat - big brown bat == 0         &lt; 1e-04 ***
+silver-haired bat - big brown bat == 0        0.00107 ** 
+hoary bat - eastern pipistrelle == 0          &lt; 1e-04 ***
+little brown bat - eastern pipistrelle == 0   0.26225    
+silver-haired bat - eastern pipistrelle == 0  &lt; 1e-04 ***
+little brown bat - hoary bat == 0             &lt; 1e-04 ***
+silver-haired bat - hoary bat == 0            &lt; 1e-04 ***
+silver-haired bat - little brown bat == 0     0.00755 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+(Adjusted p values reported -- single-step method)</code></pre>
+</div>
+</div>
+<p>According to this view, little brown bats are not different from eastern pipistrelles in terms of body length, but all other bats differ from one another. Let’s look at the compact view.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cld</span>(pct_length)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      big brown bat eastern pipistrelle           hoary bat    little brown bat 
+                "a"                 "b"                 "c"                 "b" 
+  silver-haired bat 
+                "d" </code></pre>
+</div>
+</div>
+<p>Because eastern pipistrelles and little brown bats share the same letter, they are not different in terms of body length. All other species differ from one another and from little brown and eastern pips.</p>
+</section>
+<section id="final-plot-1" class="level4">
+<h4 class="anchored" data-anchor-id="final-plot-1">Final plot</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(common_name, body_length_mm, <span class="at">color =</span> common_name))<span class="sc">+</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>()<span class="sc">+</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()<span class="sc">+</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Bat species"</span>, <span class="at">y =</span> <span class="st">"Body length (mm)"</span>)<span class="sc">+</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="results-statement-1" class="level5">
+<h5 class="anchored" data-anchor-id="results-statement-1">Results statement</h5>
+<p>Body length differs significantly among bat species (F<sub>4,120</sub> = 70.498, p &lt;&lt;&lt; 0.001); only little brown bats and eastern pipistrelles did not differ from one another in terms of body length.</p>
+</section>
+</section>
+</section>
+<section id="question-c---is-the-number-of-ticks-found-on-the-bats-associated-with-their-sex-or-age" class="level3">
+<h3 class="anchored" data-anchor-id="question-c---is-the-number-of-ticks-found-on-the-bats-associated-with-their-sex-or-age">Question C - Is the number of ticks found on the bats associated with their sex or age?</h3>
+<p>So, let’s think about these variables. Our response variable is the number of ticks, which is discrete (count) data and we’re looking for an association in that count between two categorical variables, age and sex. Thus, we’re looking at a chi-square test of association.</p>
+<p>Let’s go. Let’s start by organizing the data by sex and age and getting counts.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>tick_counts <span class="ot">&lt;-</span> bats <span class="sc">|&gt;</span> <span class="fu">group_by</span>(sex, age) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">num_ticks =</span> <span class="fu">sum</span>(tick_num, <span class="at">na.rm =</span> T)</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sex'. You can override using the `.groups`
+argument.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(tick_counts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now I have a nice data frame that has the total number of ticks by sex and age combination. Just eyeballing the table, it looks like males might have more ticks than females regardless of age. We’ll see what happens.</p>
+<section id="plot-the-data" class="level4">
+<h4 class="anchored" data-anchor-id="plot-the-data">Plot the data</h4>
+<p>Since we have count data, not means, a bar plot is appropriate here</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tick_counts, <span class="fu">aes</span>(sex, num_ticks, <span class="at">fill =</span> age))<span class="sc">+</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Yes - according to my figure, it looks a bit like males have more ticks that females regardless of age. I expect to reject the null hypothesis that there is no difference in tick number between sex and age groups of bats.</p>
+</section>
+<section id="create-the-model-1" class="level4">
+<h4 class="anchored" data-anchor-id="create-the-model-1">Create the model</h4>
+<p>In order to use the <code>chisq.test</code> function, we need to convert our summary data table to a matrix.</p>
+<p>We use the function <code>xtabs</code> to do so.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>tick.mat <span class="ot">&lt;-</span> <span class="fu">xtabs</span>(tick_num <span class="sc">~</span> age <span class="sc">+</span> sex, <span class="at">data =</span> bats)</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">View</span>(tick.mat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We see when we view the matrix that it looks just like our tick_counts summary table. The only difference is that its structure is a matrix (note that it shows up under “Values” in our environment window) rather than a data frame.</p>
+<p>Now that we have our matrix, we can conduct our test.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">chisq.test</span>(tick.mat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Pearson's Chi-squared test with Yates' continuity correction
+
+data:  tick.mat
+X-squared = 0.33718, df = 1, p-value = 0.5615</code></pre>
+</div>
+</div>
+</section>
+<section id="check-assumptions-1" class="level4">
+<h4 class="anchored" data-anchor-id="check-assumptions-1">Check Assumptions</h4>
+<p>We do not make the same assumptions with a chi-square test that we do for linear models like linear regression and anova, so we can skip that step</p>
+</section>
+<section id="interpret-the-model-1" class="level4">
+<h4 class="anchored" data-anchor-id="interpret-the-model-1">Interpret the model</h4>
+<p>I was wrong! With a p value of 0.5615, I do not have enough evidence to reject my null hypothesis. I must conclude that there is not an association between sex and age when looking at how many ticks are found on individual bats.</p>
+</section>
+<section id="final-plot-2" class="level4">
+<h4 class="anchored" data-anchor-id="final-plot-2">Final plot</h4>
+<p>Let’s make a nicer looking plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(tick_counts, <span class="fu">aes</span>(sex, num_ticks, <span class="at">fill =</span> age))<span class="sc">+</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>)<span class="sc">+</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Bat sex"</span>, <span class="at">y =</span> <span class="st">"Number of ticks in group"</span>)<span class="sc">+</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"gray"</span>, <span class="st">"black"</span>))<span class="sc">+</span></span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="results-statement-2" class="level5">
+<h5 class="anchored" data-anchor-id="results-statement-2">Results statement</h5>
+<p>I cannot reject the null hypothesis that the number of ticks on bats is not associated with bat sex or age (`$\chi^{2}$`= 0.33718, df = 1, p = 0.5615).</p>
+<p>$\chi^{2}$</p>
+</section>
+</section>
+</section>
+<section id="question-d---disregarding-species-is-there-a-relationship-in-bats-between-tail-length-and-body-length" class="level3">
+<h3 class="anchored" data-anchor-id="question-d---disregarding-species-is-there-a-relationship-in-bats-between-tail-length-and-body-length">Question D - Disregarding species, is there a relationship in bats between tail length and body length?</h3>
+<p>This question involves two continuous variables, so looking at an association between them is going to involve linear regression. Because we are looking for an association between them, but not causation, it isn’t critical which variable we treat as the response and which we treat at the predictor. I’m going to use tail length as a function of body length. My hypothesis is that bigger bats (those with longer bodies) will have longer tails than smaller bats.</p>
+<section id="plot-the-data-1" class="level4">
+<h4 class="anchored" data-anchor-id="plot-the-data-1">Plot the data</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(body_length_mm, tail_length_mm))<span class="sc">+</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Ok. From the plot, it sure looks like there is a pretty strong relationship between the two variables. I would guess the y-intercept to be about 13.5. y-axis values range between about 12 and 100 so the rise is 100 - 12 = 88. x values appear to range between 61 and 175 so 175 - 61 = 114.</p>
+<p>Thus, my expected slope is about 88/114 = 0.77 for my expected slope.</p>
+</section>
+<section id="create-the-model-2" class="level4">
+<h4 class="anchored" data-anchor-id="create-the-model-2">Create the model</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>tail.mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(tail_length_mm <span class="sc">~</span> body_length_mm, <span class="at">data =</span> bats)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="check-model-assumptions-1" class="level4">
+<h4 class="anchored" data-anchor-id="check-model-assumptions-1">Check model assumptions</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(tail.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>These data look to be a pretty good fit to our assumptions so I’m going to keep going.</p>
+</section>
+<section id="interpret-the-model-2" class="level4">
+<h4 class="anchored" data-anchor-id="interpret-the-model-2">Interpret the model</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(tail.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Analysis of Variance Table
+
+Response: tail_length_mm
+                Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+body_length_mm   1  33391   33391  1037.2 &lt; 2.2e-16 ***
+Residuals      123   3960      32                      
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Here I see that there is a significant association between body mass and tail length.</p>
+<p>Let’s dig in further.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(tail.mod)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = tail_length_mm ~ body_length_mm, data = bats)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-12.4242  -4.3148   0.1779   3.4913  13.7551 
+
+Coefficients:
+                Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)    -14.83738    2.16786  -6.844 3.22e-10 ***
+body_length_mm   0.61443    0.01908  32.206  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 5.674 on 123 degrees of freedom
+Multiple R-squared:  0.894, Adjusted R-squared:  0.8931 
+F-statistic:  1037 on 1 and 123 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>From this I see that I didn’t estimate the y-intercept very well as it is actually -14.84. The slope is 0.61. The adjusted R2 is 0.89, which means that about 89% of the variation in tail length is associated with body length.</p>
+</section>
+<section id="final-plot-3" class="level4">
+<h4 class="anchored" data-anchor-id="final-plot-3">Final plot</h4>
+<p>Let’s get a nicer looking plot</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(bats, <span class="fu">aes</span>(body_length_mm, tail_length_mm))<span class="sc">+</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>)<span class="sc">+</span></span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Bat body length (mm)"</span>, <span class="at">y =</span> <span class="st">"Bat tail length (mm)"</span>)<span class="sc">+</span></span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="PS3-key_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="results-statement-3" class="level5">
+<h5 class="anchored" data-anchor-id="results-statement-3">Results statement</h5>
+<p>There is a statistically significant and positive association between tail length and body length in bats (df = 1, 123, p = &lt;&lt;&lt; 0.001, R2 = 0.8931).</p>
+</section>
+</section>
+</section>
+</section>
+<section id="and-voila-look-at-how-much-you-have-learned" class="level2">
+<h2 class="anchored" data-anchor-id="and-voila-look-at-how-much-you-have-learned">And voila! Look at how much you have learned!</h2>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
