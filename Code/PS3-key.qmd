@@ -413,6 +413,6 @@ ggplot(bats, aes(body_length_mm, tail_length_mm))+
 
 ##### Results statement
 
-There is a statistically significant and positive association between tail length and body length in bats (df = 1, 123, p = \<\<\< 0.001, R2 = 0.8931).
+There is a statistically significant and positive association between tail length and body length in bats (F~1,\ 123~ = 1037.2, p = \<\<\< 0.001, R^2^ = 0.8931).
 
 ## And voila! Look at how much you have learned!
