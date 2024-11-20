@@ -111,7 +111,7 @@ We will use our standard workflow: plot the data and guess the result -\> create
 
 This question is asking us to look at body mass as a function of species, so body mass is the response variable and species is the predictor variable.
 
-Body mass is a continuous variable and species is a categorial variable with more than two groups, so my test should be a 1-way ANOVA.
+Body mass is a continuous variable and species is a categorical variable with more than two groups, so my test should be a 1-way ANOVA.
 
 #### Make the plot and guess the outcome
 
@@ -198,7 +198,7 @@ ggplot(bats, aes(common_name, mass_g, color = common_name))+
 
 ##### Results statement
 
-Hoary bats are significantly heavier than big brown bats, who are significantly heavier than silver-haired bats, who are significantly heavier than little brown bats, who are significantly heavier than easter pipistrelle bats (F~4,120~ = 792.9, p \<\<\< 0.001).
+Hoary bats are significantly heavier than big brown bats, who are significantly heavier than silver-haired bats, who are significantly heavier than little brown bats, who are significantly heavier than eastern pipistrelle bats (F~4,120~ = 792.9, p \<\<\< 0.001).
 
 Ok! Finished! On to question B!
 
@@ -413,6 +413,6 @@ ggplot(bats, aes(body_length_mm, tail_length_mm))+
 
 ##### Results statement
 
-There is a statistically significant and positive association between tail length and body length in bats (F~1,\ 123~ = 1037.2, p = \<\<\< 0.001, R^2^ = 0.8931).
+There is a statistically significant and positive association between tail length and body length in bats (F~1, 123~ = 1037.2, p = \<\<\< 0.001, R^2^ = 0.8931).
 
 ## And voila! Look at how much you have learned!
