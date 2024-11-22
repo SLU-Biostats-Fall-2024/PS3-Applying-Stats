@@ -1,0 +1,363 @@
+---
+title: "Problem Set 3 - Statistics"
+format: html
+editor: visual
+---
+
+#### Set Up Quarto Document
+
+```{r}
+rm(list = ls())
+library(tidyverse)
+library(here)
+library(ggfortify)
+library(multcomp)
+```
+
+#### Read in and reformat data
+
+```{r}
+bats <- read.csv(here("Data", "bat_data.csv"))
+glimpse(bats)
+```
+
+Using the glimpse function shows that several variables that should be factors are currently character data types, so those need fixed.
+
+```{r}
+bats$Species <- as.factor(bats$Species)
+bats$common_name <- as.factor(bats$common_name)
+bats$age <- as.factor(bats$age)
+bats$sex <- as.factor(bats$sex)
+bats$type <- as.factor(bats$type)
+```
+
+### Part A.
+
+Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?
+
+In this question we are using a categorical predictor with 5 levels, Species, to predict body mass, which is continuous ratio data.
+
+When working with a categorical predictor with more than 2 levels and a continuous response variable, the appropriate statistical test is one way ANOVA.
+
+#### Plot the data
+
+```{r}
+ggplot(bats, aes(Species, mass_g))+
+  geom_boxplot()+
+  geom_point()+
+  theme_bw()+
+  coord_flip()
+```
+
+Based on the plot, there does seem to be a difference in body mass between the five bat species.
+
+-   PESU seems to have a mean body mass of around 6g
+
+-   MYLU has a mean body mass of about 11g
+
+-   LANO has a mean body mass of about 14.5g
+
+-   LACI has a mean body mass of about 27g
+
+-   and EPFU has a mean body mass of about 21g
+
+Degrees of Freedom = n-levels = 125 - 5 = 120
+
+#### Construct the ANOVA and check assumptions
+
+```{r}
+bat_model <- lm(mass_g ~ Species, data = bats)
+
+autoplot(bat_model)
+```
+
+All plots look good so analysis can continue.
+
+#### Interpret the model
+
+```{r}
+anova(bat_model)
+summary(bat_model)
+```
+
+Anova rejects the null hypothesis that there is no difference in means between the five groups.
+
+There is an association between bat species and body mass (p = 2.2e-16, df = 120, F = 792.2).
+
+The summary table shows that there is a significant difference between all 5 groups. This can be confirmed using the multcomp package to conduct a Tukey's HSD test.
+
+```{r}
+ph_bats1 <- glht(bat_model, linfct = mcp(Species = "Tukey"))
+summary(ph_bats1)
+
+cld(ph_bats1)
+```
+
+You cana also use dplyr functions to calculate means
+
+```{r}
+sumBat1 <- bats |>
+  group_by(Species) |>
+  summarise(mean_mass_g = mean(mass_g))
+
+View(sumBat1)
+```
+
+The mean mass for EPFU is 20.5g, the mean mass for LACI is 27.4g, the mean mass for LANO is 14.5g, the mean mass MYLU is 10.4g, and the mean mass for PESU is 7.41g
+
+#### Plot Again
+
+```{r}
+ggplot(bats, aes(Species, mass_g, color = Species))+
+  geom_point(size = 3, alpha = 0.75)+
+  geom_point(data = sumBat1, aes(Species, mean_mass_g, 
+                                 fill = Species),
+             shape = 23, size = 5)+
+  coord_flip()+
+  theme_bw()
+  
+```
+
+### Part B.
+
+Does body length differ between these five species of bats and, if so, how does body length differ between the species?
+
+This question is very similar to the question from part B except instead of body mass, we are looking at body length. Species is the predictor and is a nominal categorical variable, and body_length_mm is the response variable and is continuous ratio data.
+
+Like in part A, we are working with a categorical predictor with more than 2 levels and a continuous response, so we should do an ANOVA.
+
+#### Plot the data
+
+```{r}
+ggplot(bats, aes(Species, body_length_mm))+
+  geom_boxplot()+
+  geom_point()+
+  theme_bw()+
+  coord_flip()
+```
+
+Based on the plot, there does seem to be a difference in body mass between the five bat species.
+
+-   PESU seems to have a mean body length of around 85mm
+
+-   MYLU has a mean body length of about 95mm
+
+-   LANO has a mean body length of about 108mm
+
+-   LACI has a mean body length of about 143mm
+
+-   and EPFU has a mean body length of about 121mm
+
+Degrees of Freedom = n-levels = 125 - 5 = 120
+
+#### Construct the ANOVA and Check Assumptions
+
+```{r}
+bat_model2 <- lm(body_length_mm ~ Species, data = bats)
+
+autoplot(bat_model2)
+```
+
+Plots look very good. All assumptions are met. Analysis can continue.
+
+#### Interpret the model
+
+```{r}
+anova(bat_model2)
+summary(bat_model2)
+```
+
+The anova table allows us to reject the null hypothesis. There is an association between bat species and body length (p \< 2.2e-16, df = 120, F = 70.498)
+
+Dplyr allows us to find the mean body length in each group
+
+```{r}
+sumBat2 <- bats |>
+  group_by(Species) |>
+  summarise(mean_body_length_mm = mean(body_length_mm))
+
+View(sumBat2)
+```
+
+The mean body length for EPFU is 123.4mm, the mean length for LACI is 146.04mm , the mean length for LANO is 106.68mm, the mean length of MYLU is 92.4mm, and the mean mass for PESU is 83.9g
+
+#### Post Hoc test
+
+You can do a tukey test to find differences between group means
+
+```{r}
+ph_bats2 <- glht(bat_model2, linfct = mcp(Species = "Tukey"))
+summary(ph_bats2)
+
+cld(ph_bats2)
+```
+
+The Tukey test shows that EPFU, LACI, and LANO, are all distinct groups while MYLU and PESU are not statistically different from each other but they are different from the other 3 groups.
+
+#### Plot again
+
+```{r}
+ggplot(bats, aes(Species, body_length_mm, color = Species))+
+  geom_point(size = 3, alpha = 0.75)+
+  geom_point(data = sumBat2, aes(Species, 
+                                 mean_body_length_mm, 
+                                 fill = Species),
+             shape = 23, size = 5)+
+  coord_flip()+
+  theme_bw()
+```
+
+### Part C.
+
+Is the number of ticks found on the bats associated with their sex or age?
+
+This is two analyses in one question:
+
+-   Is the number of ticks found on the bats associated with their sex?
+
+-   Is the number of ticks found on the bats associated with their age?
+
+Both have a categorical predictor with two levels: sex (male or female) or age (adult or subadult), and a continuous response variable, number of ticks.
+
+While number of ticks is a count, so it is technically discrete data, it can be treated as ratio data for the sake of statistical analysis.
+
+For both questions, the appropriate statistical test is a two sample t-test because we have a categorical predictor with two groups and a continuous response.
+
+#### Plot the data
+
+First, plot the relationship between sex and number of ticks with a faceted histogram
+
+```{r}
+ggplot(bats, aes(tick_num))+
+  geom_histogram()+
+  facet_wrap(~sex, ncol = 1)+
+  theme_bw()
+```
+
+On average, male bats appear to have more ticks than female bats. Both subgroups of the data appear to be normally distributed.
+
+Next, make a similar plot for age.
+
+```{r}
+ggplot(bats, aes(tick_num))+
+  geom_histogram()+
+  facet_wrap(~age, ncol = 1)+
+  theme_bw()
+```
+
+There appears to be less association between age and number of ticks than there is between sex and number of ticks. Subadult bats seem to have fewer ticks on average than adult bats but the distributions are relatively similar. Both groups are approximately normally distributed.
+
+#### Calculate Means, SDs
+
+Use dplyr functions to calculate the mean and standard deviations for each group before moving on to statistical analysis.
+
+First the mean number of ticks and standard deviation for male and female bats
+
+```{r}
+bats |> group_by(sex) |>
+  summarise(mean_ticks = mean(tick_num),
+            sd_ticks = sd(tick_num)) |>
+  View()
+```
+
+The mean number of ticks found on female bats is 4.40 with a standard deviation of 0.954. The mean number of ticks found on male bats is 6.29 with a standard deviation of 1.03. These numbers seem different.
+
+Repeat this for age
+
+```{r}
+bats |> group_by(age) |>
+  summarise(mean_ticks = mean(tick_num),
+            sd_ticks = sd(tick_num)) |>
+  View()
+```
+
+Looking at these results, the mean number of ticks on adult bats is 5.48 with a standard deviation of 1.31 while the mean number of ticks found on subadult bats is 5.08 with a standard deviation of 1.41. These numbers are closer together and there may not be a difference between groups.
+
+#### Run the t-tests
+
+Run t-tests for the effects of sex and age on number of ticks found
+
+```{r}
+t.test(tick_num ~ sex, data = bats)
+t.test(tick_num ~ age, data = bats)
+```
+
+#### Interpret results
+
+Sex:
+
+We can reject the null hypothesis that there is no association between sex and number of ticks found. There is a difference in number of ticks found on male and female bats (t = -10.608, df = 117.45, p \< 2.2e-16).
+
+Age:
+
+We fail to reject the null hypothesis that there is no association between age and number of ticks found on bats (t = 1.6291, df = 122.01, p = 0.1059).
+
+#### Plot again
+
+### Part D.
+
+Disregarding species, is there a relationship in bats between tail length and body length?
+
+For this question, both the predictor and response variables are ratio data. When working with a continuous predictor and a continuous response use simple linear regression.
+
+#### Plot the data
+
+Make a scatterplot to see the relationship between tail length and body length.
+
+```{r}
+ggplot(bats, aes(body_length_mm, tail_length_mm))+
+  geom_point()+
+  theme_bw()
+```
+
+There seems to be a positive linear relationship between body length and tail length.
+
+Tail length seems to range from about 60mm to 175mm.
+
+Body length seems to range from about 25mm to 100mm.
+
+based on those estimates, the slope of the regression line is about 1.53
+
+The y-intercept is somewhere around 15.
+
+#### Build a linear regression model 
+
+```{r}
+bat_model3 <- lm(body_length_mm ~ tail_length_mm, data = bats)
+```
+
+#### Check Assumptions
+
+```{r}
+autoplot(bat_model3)
+```
+
+Plots look good. Some deviance from the dotted line in the residuals vs fitted plot but nothing too serious.
+
+#### Interpret the model
+
+```{r}
+anova(bat_model3)
+summary(bat_model3)
+```
+
+The anova table shows that we can reject the null hypothesis that there is no association between tail length and body length in bats.
+
+There is a positive linear relationship between body length and tail length in bats ( p \<2e-16, F = 156.08, r-squared = 0.8931).
+
+The y-intercept of the regression line is 33.29990.
+
+The slope of the regression line is 1.45498.
+
+#### Plot again
+
+add a the regression line to the scatterplot.
+
+```{r}
+ggplot(bats, aes(body_length_mm, tail_length_mm))+
+  geom_point()+
+  geom_smooth(method = "lm")+
+  labs(x = "Body Length (mm)",
+       y = "Tail Length (mm)")+
+  theme_bw()
+```
