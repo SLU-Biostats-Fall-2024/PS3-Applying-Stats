@@ -1,0 +1,174 @@
+---
+title: "Problem Set 3 - Statistics"
+format: html
+editor: visual
+---
+
+# Setup
+
+```{r}
+rm(list = ls())
+library(tidyverse)
+library(here)
+library(ggfortify)
+bats<-read.csv(here("data","bat_data.csv"))
+glimpse(bats)
+```
+
+## Fixing variables
+
+### columns
+
+```{r}
+bats$Species<- as.factor(bats$Species)
+bats$common_name<-as.factor(bats$common_name)
+bats$age<-as.factor(bats$age)
+bats$sex<-as.factor(bats$sex)
+bats$type<-as.factor(bats$type)
+```
+
+### factor levels
+
+all good actually
+
+# Hyp 1
+
+#### body mass and species
+
+look at it first:
+
+```{r}
+ggplot(bats, aes(common_name,mass_g))+
+  geom_boxplot()+
+  geom_point(color='blue',alpha=.5)+
+  theme_bw()
+```
+
+At first: Potentially all significantly different from each other. From low to high: Eastern Pipistrelle, Little Brown, Silver-Haired, Big Brown, Hoary.
+
+### A one way anova
+
+Chose this because it has one categorical and one continuous variable.
+
+```{r}
+batmod<-lm(mass_g~common_name,data=bats)
+autoplot(batmod)
+```
+
+Looks good!
+
+### Stats
+
+```{r}
+anova(batmod)
+summary(batmod)
+library(multcomp)
+battukey<- glht(batmod, linfct = mcp(common_name = "Tukey"))
+summary(battukey)
+```
+
+Based on the anova, we know that there is a relationship here and by the tukey test, we know that they are, in fact, all significantly different from each other. Specifically: Eastern Pipistrelle \< Little Brown \< Silver-Haired \< Big Brown \< Hoary.
+
+# Hyp 2
+
+#### body length and species
+
+look at it first:
+
+```{r}
+ggplot(bats, aes(common_name,body_length_mm))+
+  geom_boxplot()+
+  geom_point(alpha=.5)+
+  theme_bw()
+```
+
+At first: I would guess that the big brown bat is statistically higher than the eastern pipistrelle and the little brown bat, and lower than the hoary. The hoary is higher than all of them. The Eastern pipistrelle is lower than big brown, hoary, and silver haired. The little brown is lower than the big brown and hoary. Finally, I predict the silver haired is only lower than the hoary and higher than the eastern pipistrelle.
+
+### A one way anova (again)
+
+Chose this because it has one categorical and one continuous variable.
+
+```{r}
+batmodlength<-lm(body_length_mm~common_name,data=bats) 
+autoplot(batmodlength)
+```
+
+Looks good as well!
+
+### Stats
+
+```{r}
+anova(batmodlength) 
+summary(batmodlength) 
+batlengthtukey<- glht(batmodlength, linfct = mcp(common_name = "Tukey")) 
+summary(batlengthtukey)
+```
+
+We again know that there is a relationship here. By the tukey test, we know that they are, in fact, all significantly different from each other. Specifically: Eastern Pipistrelle \< Little Brown \< Silver-Haired \< Big Brown \< Hoary, which is the same ordering as last time.
+
+# Hyp 3
+
+#### Ticks and sex or age
+
+### Rearrange data into new df
+
+```{r}
+batcountsage<-bats|>
+  group_by(age,sex)|>
+  summarise(tickstot=sum(tick_num))
+```
+
+```{r}
+ggplot(batcountsage,aes(age,tickstot,fill=sex))+
+  geom_bar(stat='identity',position = 'dodge')
+```
+
+It seems male squirrels tend to have more ticks, but age has little role in how many ticks a bat gets (at any one point in time).
+
+### Chi Square test
+
+Chose this because it is one categorical and one discrete variable
+
+```{r}
+batmat<-xtabs(tick_num~age+sex,data=bats)
+chisq.test(batmat)
+```
+
+###  
+
+We now know that there is not sufficient evidence to reject the null hypothesis. Though there looks to be a correlation, we cannot determine if the differences are caused by these variables yet.
+
+# Hyp 4
+
+#### tail length and body length
+
+```{r}
+ggplot(bats,aes(body_length_mm,tail_length_mm))+
+  geom_point()+
+  theme_bw()
+```
+
+There seems to be a very strong positive correlation between these two.
+
+### Linear Regression model
+
+Chose this because it is two continuous variables.
+
+```{r}
+batmodlr<-lm(tail_length_mm~body_length_mm,data=bats)
+```
+
+checking assumptions
+
+```{r}
+autoplot(batmodlr)
+```
+
+Looks great.
+
+```{r}
+anova(batmodlr)
+summary(batmodlr)
+```
+
+Here, we see that there is, in fact, a correlation between the two variables. We clearly see that there is a super strong influence by body length on tail length.
