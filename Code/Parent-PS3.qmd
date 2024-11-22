@@ -1,0 +1,275 @@
+---
+title: "Parent-PS3"
+author: Alexis Parent 
+date: 11/11/2024
+format: html
+editor: visual
+---
+
+```{r}
+# set up R and clean R's brain
+rm(list=ls())
+library(tidyverse)
+library(multcomp)
+library(dplyr)
+library(ggfortify)
+library(here)
+```
+
+```{r}
+# read in data 
+bats <- read.csv(here("Data", "bat_data.csv"))
+```
+
+```{r}
+# examine the data to see what we are looking at 
+glimpse(bats)
+view(bats)
+```
+
+I am using glimpse so I can take a quick look at the data and see how many rows and columns I am looking at. I am also using view so I can open up a new tab of the data, and scan through so I can see if there are any data entry errors or data points that look odd. I can see there are 125 rows and 9 columns. After re-leveling the columns below I can also take another look at the levels, where everything looks correct.
+
+```{r}
+# correcting the data! first changing species to lowercase
+colnames(bats) <- tolower(colnames(bats))
+
+# changing to factor variables and releveling
+bats$species <- factor(bats$species)
+levels(bats$species)
+
+bats$common_name <- factor(bats$common_name)
+levels(bats$common_name)
+
+bats$age <- factor(bats$age)
+levels(bats$age)
+
+bats$sex <- factor(bats$sex)
+levels(bats$sex)
+
+bats$type <- factor(bats$type)
+levels(bats$type)
+```
+
+1.  Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?
+    -   To begin out analysis we have to determine what test will be conducted. An ANOVA will be most effective because there is a continuous dependent variable (body mass) and a categorical independent variable (bat species).
+
+```{r}
+# Graph the data to look for relationships
+ggplot(bats, aes(mass_g)) + 
+    geom_histogram() + 
+    facet_wrap(~ species)
+```
+
+Looking at the graph, we can see some bat species weigh more than others. LACI has the greatest body mass while PESU has the lowest body mass (g). MYLU has the second lowest body mass, followed by LANO. EPFU seems to have the second highest body mass. As a result we can see there is a relationship between body mass (g) and species.
+
+```{r}
+# build the model
+bat_species_weight_mod <- lm(mass_g ~ species, data = bats)
+
+# check model assumptions
+autoplot(bat_species_weight_mod, smooth.colour = NA)
+```
+
+From the assumptions we can see there is a relatively normal distribution, as the points for the most part follow the theoretical qualities. In the other graphs the observations are grouped together in lines because there is a categorical independent variable.
+
+```{r}
+# run anova 
+anova(bat_species_weight_mod)
+
+# get summary of anova 
+summary(bat_species_weight_mod)
+```
+
+From the results we can see there is a significant difference between bat species and weight(p \< 0.05, df = 4, f = 792.9).
+
+```{r}
+# signifigant results so now we conduct a post hoc test
+library(multcomp)
+
+# Tukey test
+phc1 <- glht(bat_species_weight_mod, linfct = mcp(species = "Tukey"))
+summary(phc1)
+
+# create a compact letter display to further understand differences
+cld(phc1)
+```
+
+From the results we can see that the post-hoc Tukey test shows that all species are signifigantly distinct from one another because each one has it's own letter. Furthermore, from the table it is shown how different the t values are from one another, indicating a significant difference.
+
+```{r}
+# creating a polished figure 
+ggplot(bats, aes(mass_g)) + 
+    geom_histogram(binwidth = 3) + 
+    facet_wrap(~ species) + 
+    labs(
+      title = "Bat Species Distribution by Mass",
+        x = "Mass (g)",
+        y = "Species Count" 
+    )
+```
+
+Summary polished results:
+
+An ANOVA test was performed to test for differences in body mass across five species of bats. A significant difference was seen between bat species and body mass (p\<0.05, df = 4, f = 792.9). A Tukey test was conducted to compare the body mass between each of the five species (EPFU, LACI, LANO, MYLU, PESU), where it can be seen there was significant difference in body mass between each species (p \< 0.05).
+
+**Question 2:** Does body length differ between these five species of bats and, if so, how does body mass differ between the species?
+
+-   To begin out analysis we have to determine what test will be conducted. An ANOVA will be most effective because there is a continuous dependent variable (body length) and a categorical independent variable (bat species).
+
+```{r}
+# Graph the data to look for relationships
+ggplot(bats, aes(body_length_mm)) + 
+    geom_histogram() + 
+    facet_wrap(~ species)
+```
+
+From the graphs we can see there is some difference between bat species and bat body length. It looks like LACI has the longest body length while PESU has the smallest body length. Furthermore, LANO has the largest variability in body length.
+
+```{r}
+# build the model
+bat_body_length_mod <- lm(body_length_mm ~ species, data = bats)
+
+# check model assumptions 
+autoplot(bat_body_length_mod, smooth.colour = NA)
+```
+
+From the graphs we can see the observations follow the line for a relatively normal distribution. Furthermore, in the other graphs the observations are grouped together due to there being a categorical independent variable (species).
+
+```{r}
+# run anova 
+anova(bat_body_length_mod)
+
+# get summary of anova 
+summary(bat_body_length_mod)
+```
+
+There is a significant difference between bat body length and bat species (p\<0.05, f = 70.498, df = 4).
+
+```{r}
+# Tukey test because there is a signifigant difference between body length and species 
+phc2 <- glht(bat_body_length_mod, linfct = mcp(species = "Tukey"))
+summary(phc2)
+
+# create a compact letter display to further understand differences
+cld(phc2)
+```
+
+From the Tukey test we can see that there is a significant difference between all bat species and body length (mm) except PESU and MYLU because the p-values are larger than 0.05 and the letter variables are the same compared to the rest.
+
+```{r}
+# creating a polished figure 
+ggplot(bats, aes(body_length_mm)) + 
+    geom_histogram(binwidth = 7) + 
+    facet_wrap(~ species) + 
+  labs(
+    title = "Bat Species Distribution by Body Length",
+      x = "Bat Species Count",
+      y = "Body Length (mm)"
+  )
+
+```
+
+Summary Polished Results:
+
+An ANOVA test was performed to test for differences in bat body length (mm) and bat species. There was a significant difference between bat body length (mm) and bat species (p\<0.05, f = 70.498, df = 4). A Tukey test was conducted to see if bat length (mm) was different between each species. Each bat species length (mm) is significantly different from each species (p\<0.05), however, species PESU and MYLU show no statistical significance (p\>0.05).
+
+**Question 3:** Is the number of ticks found on the bats associated with their sex or age?
+
+-   First we have to determine what kind of test is going to be run. We are comparing sex (which has two groups) and age (which also has two groups) with the number of ticks, which is numerical/interval data. As a result, we would conduct a t-test.
+
+```{r}
+# Graph the data to look for relationships
+ggplot(bats, aes(x = sex, y = tick_num, fill = age)) +
+  geom_boxplot() + 
+  scale_fill_manual(values = c("adult" = "lightblue", "subadult" = "lightgreen"))
+```
+
+From the graph we can see that males seem to have a greater number of ticks present than females. Furthermore, there doesn't seem to be a difference between if females are adults or sub adults for the amount of ticks present. For males, there seems to be a wider number of ticks for adults and a smaller number of ticks for sub adults.
+
+```{r}
+# build the model
+tick_sex_mod <- lm(tick_num ~ sex, data = bats)
+tick_age_mod <- lm(tick_num ~ age, data = bats)
+
+summary(tick_sex_mod)
+
+# check model assumptions 
+autoplot(tick_sex_mod , smooth.colour = NA)
+autoplot(tick_age_mod, smooth.colour = NA)
+
+```
+
+From the assumptions we can see with bat sex and tick number the data points are normally distributed along the line, and the points are grouped together because the x axis is a categorical variable. From the assumptions between bat age and tick number we can see the points follow the line and are normally distributed. However, in all of the other graphs (for both relationships) the observations fall either on the far right or far left sides of the graph.
+
+```{r}
+# conduct a t-test
+t.test(tick_num ~ age, data = bats)
+
+t.test(tick_num ~ sex, data = bats)
+
+```
+
+Interpretation:
+
+-   tick_num by age: There is not a significant difference between tick number and age of bats (p\>0.05, t = 1.6291, df = 122.01).
+-   tick_num by sex: There is a significant difference between sex and tick number (p \<0.05, t = -10.608, df = 117.45). Furthermore, the large t statistic represents a large difference between males and females.
+
+```{r}
+# create a polished figure 
+ggplot(bats, aes(x = sex, y = tick_num, fill = age)) +
+  geom_boxplot() + 
+  scale_fill_manual(values = c("adult" = "lightblue", "subadult" = "lightgreen")) + 
+  labs(
+    title = "Tick Count by Sex",
+      x = "Sex", 
+      y = "Tick Count" 
+  )
+
+```
+
+Summary Polished Results:
+
+A Welch Two-Sample t-test was conducted to determine if there was a difference between tick number by age and tick number by sex. There was not a significant difference observed between age (adults and subadults) and tick number (p\>0.05, t = 1.6291, df = 122.01). However, there was a significant difference observed between sex and tick number (p \<0.05, t = -10.608, df = 117.45). Furthermore, females had significantly lower number of ticks (4.403) than males (6.293).
+
+**Question 4:** Disregarding species, is there a relationship in bats between tail length and body length?
+
+-   To begin out analysis we have to determine what test will be conducted. We will conduct a regression analysis because the response variable is ratio data, with a continuous predictor variable, and there is not more than one predictor variable. As a result we will conduct a regression model.
+
+```{r}
+# graph to look at data 
+ggplot(bats, aes(body_length_mm, tail_length_mm)) + 
+  geom_point(size = 3)
+```
+
+From the graph we can see there is a positive linear relationship between body length in mm and tail length of bats in mm.
+
+```{r}
+# build the model
+body_tail_length <- lm(tail_length_mm ~ body_length_mm, data = bats)
+
+# check model assumptions 
+autoplot(body_tail_length)
+```
+
+From the assumption graphs, we can see that for the most part the observations are relatively normally distributed. However, in the other three plots the observations do not follow the expected blue lines, and instead the observations are spread throughout the graph.
+
+```{r}
+# run f-test for a regression model
+summary(body_tail_length)
+```
+
+**Interpretation:** There is a significant difference between body length and tail length in mm (p \< 0.05, f = 1037, t = 32.206). The degrees of freedom (123) is the number of observations minus the estimated parameters (large sample size). The large F-statistic (1037) indicates the model is statistically significant.
+
+```{r}
+# polished figure 
+ggplot(bats, aes(body_length_mm, tail_length_mm)) + 
+  geom_point(size = 3) +
+  theme_classic() + 
+  xlab("Body Length mm") +
+  ylab("Tail Length mm")
+
+```
+
+Summary Polished Results:
+
+An linear regression analysis was conducted to see if there was a difference between bat tail length (mm) and bat body length (mm). There is a significant relationship between bat tail length and body length (p \< 0.05, f = 1037, t = 32.206).
