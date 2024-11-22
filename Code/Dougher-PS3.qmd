@@ -1,0 +1,237 @@
+---
+title: "Dougher-PS3"
+author: "Margaret Dougher"
+format: html
+editor: visual
+---
+
+## Setting things up
+```{r}
+rm(list=ls()) #clears R's brain
+library(here) #tells R file path for project
+library(tidyverse) #initiates necessary packages
+library(ggfortify)
+library(multcomp)
+```
+
+## Importing data
+```{r}
+bats <- read.csv(here("Data", "bat_data.csv"))
+```
+
+## Looking at my data
+```{r}
+glimpse(bats) #looking at data
+
+bats$sex <- as.factor(bats$sex) #changing to factor variable
+bats$age <- as.factor(bats$age)
+bats$type <- as.factor(bats$type)
+bats$common_name <- as.factor(bats$common_name)
+bats$Species <- as.factor(bats$Species)
+
+levels(bats$common_name) #checking different levels of the factor variables
+levels(bats$type)
+levels(bats$age)
+levels(bats$sex)
+```
+
+###Question 1: Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?
+
+## Exploring my data
+```{r}
+summary(bats) 
+
+bats |>
+  group_by(Species) |>
+  summarise(mean_mass_g = mean(mass_g)) #using Species as my grouping variable and looking for the mean mass_g for each species
+
+ggplot(bats, aes(x = Species, y = mass_g)) +
+  geom_boxplot() +
+  theme_bw() #using a boxplot to look at my data
+
+ggplot(bats, aes(mass_g)) +
+  geom_histogram() +
+  facet_wrap(~Species) #using a histogram to look at my data and using facet_wrap to to divide the Species treatment and create multiple historgrams to view my data better
+```
+
+I decided for my data to use ANOVA as my statisitcal test. My response variable (mass_g) is ratio data and Species is categorical. The samples are independent and there are more than 2 groups to compare, therefore I chose ANOVA.
+
+Prediction: Body mass of bats does differ between the 5 species of bats. 
+
+## Constructing the ANOVA test
+```{r}
+model_bats <- lm(mass_g ~ Species, data = bats)
+```
+
+## Checking assumptions
+```{r}
+autoplot(model_bats)
+```
+
+## Making an inference for a one-way ANOVA
+```{r}
+anova(model_bats)
+```
+
+## Using treatment contrasts
+```{r}
+summary(model_bats)
+```
+
+This is displaying a very large F-value meaning that there is a significant difference between the variables. We also see this proved through the p-value which is very small, which indicates a significant difference (F-value = 792.9, p-value = 2.2e-16). Since there is a significant difference I need to conduct a Tukey HSD.
+
+## Conducting a Tukey HSD 
+```{r}
+phc1 <- glht(model_bats, linfct = mcp(Species = "Tukey"))
+summary(phc1)
+```
+
+## Compact letter display
+```{r}
+cld(phc1)
+```
+
+The compact letter display shows us that betwen each type of species there is a significant difference in body mass. This is shown because each type of species has a different letter.
+
+###Question 2:Does body length differ between these five species of bats and, if so, how does body length differ between the species?
+
+## Exploring my data
+```{r}
+summary(bats)
+
+bats |>
+  group_by(Species) |>
+  summarise(meanbodylength = mean(body_length_mm)) #grouping by Species and looking at the mean body_length_mm for each species
+
+ggplot(bats, aes(x = Species, y = body_length_mm)) +
+  geom_boxplot() +
+  theme_bw() #using a boxplot to visualize my data
+
+ggplot(bats, aes(body_length_mm)) +
+  geom_histogram() +
+  facet_wrap(~Species) #using a histogram to visualize my data, and using facet wrap to divide the Species treatment to create multiple histograms so I can view my data better
+```
+I decided for my data to use ANOVA as my statistical test. My response variable (body_length_mm) is interval data and Species is categorical. The samples are independent and there are more than 2 groups to compare, therefore I chose ANOVA.
+
+Prediction: Body length of bats does differ between the 5 species of bats.
+
+## Constructing ANOVA test
+```{r}
+model_bats2 <- lm(body_length_mm ~ Species, data = bats)
+```
+
+## Checking assumptions
+```{r}
+autoplot(model_bats2)
+```
+
+## Making an inference for a one-way ANOVA
+```{r}
+anova(model_bats2)
+```
+
+## Using treatment contrasts
+```{r}
+summary(model_bats2)
+```
+
+In this table it shows a large F-value indicating a significant difference between the variables. The p-value on the other hand is very small, but a small p-value indicates a significant difference in the data (F-value = 70.5, p-value = 2.2e-16). Due to there being a significant difference shown, we need to conduct a Tukey HSD.
+
+## Conducting a Tukey HSD
+```{r}
+phc2 <- glht(model_bats2, linfct = mcp(Species = "Tukey"))
+summary(phc2)
+```
+
+## Compact letter display
+```{r}
+cld(phc2)
+```
+
+The compact letter display shows us that there is a significant difference between most of the species. MYLU and PESU are not significantly different from one another, but they are significantly different to all of the rest of the species (EPFU, LACI, LANO). 
+
+###Question 3: Is the number of ticks found on the bats associated with their sex or age?
+
+## Exploring data
+```{r}
+glimpse(bats)
+
+totals <- bats |>
+  group_by(age, sex) |> 
+  summarise(total.ticks = sum(tick_num)) #grouping by age and sex and looking at total tick number across both variables
+```
+
+## Plotting my data to visualize the relationships
+```{r}
+ggplot(totals, aes(x = sex, y = total.ticks, fill = age)) +
+  geom_bar(stat = 'identity', position = 'dodge')
+```
+
+I have chosen to do a chi-square statistical test. The response variables are discrete data, and the predictor variables are categorical. There are more than two groups I am looking at, therefore I would use a chi-square of independence test. 
+
+Prediction: The number of ticks on the bats will be associated with thier age and/or sex.
+
+## Creating a matrix for chi-square test
+```{r}
+bats.mat <- xtabs(total.ticks ~ sex + age, data = totals)
+```
+
+## Running Chi-square test
+```{r}
+chisq.test(bats.mat)
+```
+
+We tested the hypothesis that the number of ticks found on bats is associated with the age and sex of the bat. The number of ticks is not equally distributed based on age and sex (X-squared = 0.34, df = 1, p = 0.5615). We would not reject our null hypothesis, because there is no significant difference between ticks found on bats and age and sex. 
+
+###Question 4: Disregarding species, is there a relationship in bats between tail length and body length?
+
+## Exploring my data
+```{r}
+glimpse(bats)
+
+bats |>
+  group_by(tail_length_mm) |>
+  summarise(mean.body_length_mm = mean(body_length_mm)) #grouping by tail length, and looking at the means of body length for each tail length
+
+ggplot(bats, aes(x = tail_length_mm, y = body_length_mm)) +
+  geom_point() +
+  xlab("Tail Length (mm)") + #altering x and y axis labels
+  ylab("Body Length (mm)") +
+  theme_bw()
+```
+
+We can see from this graph that the slope is positive. We can also see that body length ranges from about 60-175 mm. Tail length ranges from about 5-99 mm. The y-intercept is roughly around 61 mm. 
+
+I have chosen to use a regression test for this question. Both of these variables are interval data and they are continuous data. There is only one predictor variable, so that means I would perform a regression test.
+
+## Making a regression 
+```{r}
+model_bats3 <- lm(tail_length_mm ~ body_length_mm, data = bats)
+```
+
+## Checking assumptions
+```{r}
+autoplot(model_bats3, smooth.colour = NA)
+```
+
+## Now the interpretation
+```{r}
+anova(model_bats3)
+```
+
+## Looking at summary table as well
+```{r}
+summary(model_bats3)
+```
+
+We can see from this table that the F-value is extremely large showing that there is a significant difference between the variables. Our p-value is very very small which also indicated a significant difference between variables (F-value = 1037.2, p-value = 2.2e-16).
+
+## Making a figure to display the results we found
+```{r}
+ggplot(bats, aes(x = tail_length_mm, y = body_length_mm)) +
+  geom_point(size = 2) + #adjusting size of points on the graph
+  geom_smooth(method = 'lm') + #adding the regression line to the scatterplot
+  xlab("Tail Length (mm)") + #altering the x and y axis labels
+  ylab("Body Length (mm)") +
+  theme_bw()
+```
