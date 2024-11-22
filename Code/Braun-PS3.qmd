@@ -1,0 +1,342 @@
+---
+title: "Braun-PS3"
+format: html
+editor: visual
+---
+
+## Set up:
+
+```{r}
+rm(list=ls()) # clear the environment
+library(tidyverse) # import tidyverse package
+library(here) # import here package
+library(ggfortify) # import ggfortify package
+library(multcomp) # import multcomp package
+```
+
+## Import the data:
+
+```{r}
+bats <- read.csv(here("Data", "bat_data.csv"))
+```
+
+## Look at the data:
+
+```{r}
+glimpse(bats) # allows us to see the data type for each column
+```
+
+Glimpsing the data shows us the number of rows, number of columns, column names, data type, and first few entries of each column. This is helpful because we need to know which data types to alter.
+
+## Change character into factor variables:
+
+```{r}
+bats$Species <- as.factor(bats$Species)
+levels(bats$Species) # levels do not need to be fixed
+
+bats$common_name <- as.factor(bats$common_name)
+levels(bats$common_name) # common_names do not need to be fixed
+
+bats$age <- as.factor(bats$age)
+levels(bats$age) # age does not need to be fixed
+
+bats$sex <- as.factor(bats$sex)
+levels(bats$sex) # sex does not need to be fixed
+
+bats$type <- as.factor(bats$type)
+levels(bats$type) # type does not need to be fixed
+```
+
+## A. Does body mass differ between these five species of bats and, if so, how does body mass differ between the species?
+
+**Step 1) Create an initial graph:**
+
+I am creating a histogram of the data because it allows us to compare the average means without calculations.
+
+```{r}
+ggplot(bats, aes(x=mass_g)) +
+  geom_histogram() +
+  facet_wrap(~Species, ncol=1)
+# create a histogram of the mass of bats for each species
+# `ncol=1` causes the histograms to be stacked on top of each other
+```
+
+The average body mass for EPFU appears to be around 22 grams. The average body mass for LACI appears to be around 28 g. The average body mass for LANO appears to be around 14 g. The average body mass for MYLU appears to be around 11 g. The average body mass for PESU appears to be around 6 g. I believe that there will be a significant difference in the mean mass between the species of bats. Each histogram appears to be normally distributed.
+
+**Step 2) Create a linear model:**
+
+Creating a linear model will allow us to run statistical tests.
+
+```{r}
+mass_model <- lm(mass_g ~ Species, data = bats)
+# Species is the predictor variable and mass_g is the response variable
+```
+
+**Step 3) Check the assumptions:**
+
+```{r}
+autoplot(mass_model, smooth.colour = NA)
+```
+
+The first plot shows us the residuals vs fitted which tells us if our data is a linear model. The dashed line is straight which is good.
+
+The normal Q-Q plot shows us if our data meets the requirements for normality. Most of the points fall on or close to the line. The variation increases towards the ends of the line but it still looks good.
+
+The Scale-Location plot shows us if our data meets the requirements for equal variance. There is no real pattern to the data so it looks good.
+
+The residuals vs levels plot helps us see if there are any points that have a lot of leverage and can effect the line. The dashed line is straight which means this assumption looks ok.
+
+**Step 4) Run the ANOVA test:**
+
+Run an ANOVA test to see if there is a significant difference in average mass in all of the species.
+
+```{r}
+anova(mass_model)
+```
+
+We run an ANOVA test because we have a ratio response variable (mass_g), a categorical predictor variable (Species), the samples are independent because the weight of one species has no effect on the weight of another species, and there are more than 2 groups to compare.
+
+The ANOVA test shows us that there is a significant difference in mass between bat species (F_4,120=792.9, p-value \< .001).
+
+Run the summary:
+
+```{r}
+summary(mass_model)
+```
+
+Since EPFU is first alphabetically, every other species mean is compared to EPFU mean. We can see that the average mass of LACI, is significantly smaller than EPFU. We can also see that the average mean of LANO, MYLU, and PESU are significantly larger than EPFU.
+
+**Step 5) Conduct a tukey test:**
+
+We are conducting a tukey test to see where the significant differences occur between species.
+
+```{r}
+mass_tukey <- glht(mass_model, linfct = mcp(Species="Tukey"))
+
+summary(mass_tukey) # run a summary of the tukey test
+
+cld(mass_tukey) # different letters signify significant differences
+```
+
+According to the tukey test: EPFU is significantly larger than MYLU, PESU, and LANO. LACI is significantly larger than LANO, MYLU, PESU, and EPFU. LANO is significantly larger than MYLU and PESU. and MYLU is significantly larger than PESU.
+
+Running the CLD makes it easier to see the significant differences. Each species has a different letter meaning they are all significantly different than each other.
+
+**Step 6) Create final plot and interpret:**
+
+```{r}
+ggplot(bats, aes(Species, mass_g)) +
+  geom_boxplot(outlier.color = factor("black")) +
+  geom_point(aes(color=Species), 
+             position = position_jitter(width=.2)) +
+  labs(y="Mass of Bats (g)") +
+  theme_bw()
+```
+
+Our null hypothesis is that there is no difference in mean mass between different species of bats. Based on the results of our tukey test, we can reject the null hypothesis and conclude that EPFU is significantly larger than MYLU, PESU, and LANO. LACI is significantly larger than LANO, MYLU, PESU, and EPFU. LANO is significantly larger than MYLU and PESU. and MYLU is significantly larger than PESU. (all p-values \<\< .001).
+
+## B. Does body length differ between these five species of bats and, if so, how does body mass differ between the species?
+
+**Step 1) Plot the data:**
+
+Making a histogram of the data allows us to compare mean length of each species without calculations.
+
+```{r}
+ggplot(bats, aes(x=body_length_mm)) +
+  geom_histogram() +
+  facet_wrap(bats$Species, ncol=1)
+# creates histograms of the body length for each species
+```
+
+The mean length of EPFU is around 124mm. The mean length of LACI is around 147mm. The mean length of LANO is around 105mm. The mean length of MYLU is around 94mm. The mean length of PESU is around 83mm. I believe that there will be a significant difference in the mean body length between species.
+
+**Step 2) Create model of the data:**
+
+Creating a linear model of the data will allow us to run statistical tests
+
+```{r}
+length_model <- lm(body_length_mm ~ Species, data = bats)
+```
+
+**Step 3) Check model assumptions:**
+
+```{r}
+autoplot(length_model, smooth.color=NA)
+```
+
+The first plot shows us the residuals vs fitted which tells us if our data is a linear model. The blue line is pretty straight so it looks good.
+
+The normal Q-Q plot shows us if our data meets the requirements for normality. Most of the points fall on or close to the line so that looks good.
+
+The Scale-Location plot shows us if our data meets the requirements for equal variance. There is no real pattern to the data so it looks good.
+
+The residuals vs levels plot helps us see if there are any points that have a lot of leverage and can effect the line. The line look straight so this assumption is ok.
+
+**Step 4) Use ANOVA test:**
+
+Run an ANOVA test to see if there is a significant difference in average body length between all species.
+
+```{r}
+anova(length_model)
+```
+
+We run an ANOVA test because we have a ratio response variable (body_length_g), a categorical predictor variable (Species), the samples are independent because the length of one species has no effect on the weight of another species, and there are more than 2 groups to compare.
+
+The ANOVA test shows us that there is a significant difference in average body length between each species (F_4,120=70.498, p-value \< .001).
+
+Run a summary:
+
+```{r}
+summary(length_model)
+```
+
+Since EPFU is first alphabetically, every other species mean is compared to EPFU mean. We can see that the average body length of LACI is significantly smaller than EPFU. We can also see that the average body length of LANO, MYLU, and PESU are significantly larger than EPFU.
+
+**Step 5) Use Tukey test:**
+
+The tukey test will help us see which species lengths are significantly different.
+
+```{r}
+length_tukey <- glht(length_model, linfct = mcp(Species="Tukey"))
+
+summary(length_tukey) # run a summary of the tukey test
+
+cld(length_tukey) # different letters signify significant differences, similar letters signify no significant difference
+```
+
+The test shows that EPFU is significantly larger than MYLU and PESU. EPFU is slightly less significantly larger than LANO. LACI is significantly larger than EPFU, LANO, MYLU, and PESU. LANO is significantly larger than PESU and slightly less significantly larger than MYLU. There is no significant difference between MYLU and PESU.
+
+**Step 6) Make a final plot and interpret:**
+
+```{r}
+ggplot(bats, aes(x=Species, y=body_length_mm)) +
+  geom_boxplot() +
+  geom_point(aes(color=Species),
+             position=position_jitter(width=.2)) +
+  labs(y = "Average Body Length (mm)") +
+  theme_bw()
+```
+
+Our null hypothesis is that there is no difference in mean body length between different species of bats. Based on the results of our tukey test, EPFU is significantly larger than MYLU and PESU. EPFU is slightly less significantly larger than LANO. LACI is significantly larger than EPFU, LANO, MYLU, and PESU. LANO is significantly larger than PESU and slightly less significantly larger than MYLU (p-values \< .05). There is no significant difference between MYLU and PESU. (p-value \> .05).
+
+## C. Is the number of ticks found on the bats associated with their sex or age?
+
+Our null hypothesis is that there is no association between sex and age and the number of ticks found.
+
+**Step 1) Plot the data:**
+
+Before we plot, we need to count up all of the ticks in each category.
+
+```{r}
+tick_count <- bats |>
+  group_by(sex, age) |>
+  summarize(count=length(tick_num)) # calculate the number of ticks by their sex and age
+```
+
+```{r}
+ggplot(tick_count, aes(sex, count, fill = age))+
+  geom_bar(stat = "identity", position = "dodge")+
+  scale_fill_manual(values = c("adult" = "gold", "subadult" = "black"))+
+  theme_bw() # plot the tick count by sex and fill by the age
+```
+
+Looking at the plot, we can see that 32 is the number of ticks found on all the female adults, 35 for female subadults, 31 for male adults, and 26 for male subadults. I don't think there will be an association of ticks found on bats with their sex and age.
+
+**Step 2) Turn data into a matrix:**
+
+We must turn the data into a matrix so we can run a chi sq test.
+
+```{r}
+tick_mat <- xtabs(count ~ sex + age, data = tick_count)
+# convert data into a matrix so we can run a chi sq test
+```
+
+**Step 3) Conduct a Chi sq test:**
+
+```{r}
+chisq.test(tick_mat) 
+# run the chisq test
+```
+
+We run a chisq test of independence because our response variable (tick_num) is descrete and we have more than 2 categorical predictor variables (age=adult/subadult and sex=male/female).
+
+We can not reject our null hypothesis because the p-value is greater than .05 (p=.6492). We conclude that there is no association between sex and age and number of ticks found.
+
+**Step 4) Make a final plot and interpret:**
+
+```{r}
+ggplot(tick_count, aes(sex, count, fill = age))+
+  geom_bar(stat = "identity", position = "dodge")+
+  scale_fill_manual(values = c("adult" = "gold", "subadult" = "black")) +
+  labs(y="Number of ticks")
+  theme_bw()
+```
+
+There is no association between sex and age and the number of ticks found. We reject our null hypothesis (p \> .05)
+
+## D. Disregarding species, is there a relationship in bats between tail length and body length?
+
+Our null hypothesis is that there is no relationship between tail length and body length.
+
+**Step 1) Plot the data:**
+
+```{r}
+ggplot(bats, aes(x=body_length_mm, y=tail_length_mm)) +
+  geom_point()
+```
+
+There appears to be a strong positive relationship between body and tail length.
+
+The tail length appears to range from 12 mm to 99 mm. The body length appears to range from 61 mm to 176 mm.
+
+The slope is calculated using rise/run so (99-12)/(176-61) = .7565
+
+The y-intercept appears to be around 18.
+
+**Step 2) Create a model:**
+
+```{r}
+body_tail_model <- lm(tail_length_mm ~ body_length_mm, data = bats)
+```
+
+**Step 3) Look at assumptions:**
+
+```{r}
+autoplot(body_tail_model, smooth.color=NA)
+```
+
+The first plot shows us the residuals vs fitted which tells us if our data is a linear model. The blue line is a not totally straight but it looks pretty good.
+
+The normal Q-Q plot shows us if our data meets the requirements for normality. Almost all of the points fall on or close to the line so that looks good.
+
+The Scale-Location plot shows us if our data meets the requirements for equal variance. There is no real pattern to the data so it looks good.
+
+The residuals vs levels plot helps us see if there are any points that have a lot of leverage and can effect the line. Two points towards the end make the line bend up slightly but overall it looks pretty good.
+
+**Step 4) Look at ANOVA table:**
+
+```{r}
+anova(body_tail_model)
+```
+
+We can reject our null hypothesis because the p value is smaller than .05. We can conclude that there is a relationship between the body length and tail length of bats (F_1,123 = 1037.2, p \<\< .001)
+
+now look at summary table:
+
+```{r}
+summary(body_tail_model)
+```
+
+The summary tells us that the slope is .6144 and the y-intercept is -14.837. The R-squared value is .894 which means that about 89.4% of tail length variation is explained by body length. Body length has a very strong effect on tail length.
+
+**Step 5) Make a final plot and interpret:**
+
+```{r}
+ggplot(bats, aes(x=body_length_mm, y=tail_length_mm))+
+     geom_point()+
+     geom_smooth(method = "lm")+
+     labs(x = "Bat Body Length (mm)", y = "Bat Tail Length (mm)")+
+     theme_bw()
+```
+
+We can reject our null hypothesis and conclude that We have significant evidence that there is a relationship between the body length and tail length of bats (F_1,123 = 1037.2, p \<\< .001).
