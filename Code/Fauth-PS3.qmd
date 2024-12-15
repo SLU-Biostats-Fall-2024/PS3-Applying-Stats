@@ -233,8 +233,7 @@ msthsd<- glht(modms, linfct = mcp(Species = "Tukey")) # object needed for displa
 cld(msthsd)
 ```
 
-Both from the traditional output and compact letter display we see that each species is significantly differet from all the other species. This means that mean body mass are discernibly different and their  average mass descends in this order: LACI, EPFU, LANO, MYLU, and PESU.
-
+Both from the traditional output and compact letter display we see that each species is significantly differet from all the other species. This means that mean body mass are discernibly different and their average mass descends in this order: LACI, EPFU, LANO, MYLU, and PESU.
 
 #### Final Figure:
 
@@ -259,15 +258,13 @@ ggplot(bat,aes(Species, mass_g, colour = Species))+
   theme_bw()
 ```
 
-Formal interpretation: 
+Formal interpretation:
 
-We have sufficient evidence that the sampled bat species have discernibly different average body masses (g) ($F_{4,120} = 792.9,$ $p < 2.2 * 10^{-16}$). Due to a significant Tukey HSD test (p = 0), we found that each species' mean body mass was significantly different from every other species tested, with this order: LACI > EPFU > LANO > MYLU > PESU.
-
+We have sufficient evidence that the sampled bat species have discernibly different average body masses (g) ($F_{4,120} = 792.9,$ $p < 2.2 * 10^{-16}$). Due to a significant Tukey HSD test (p = 0), we found that each species' mean body mass was significantly different from every other species tested, with this order: LACI \> EPFU \> LANO \> MYLU \> PESU.
 
 ## Question B:
 
-Does body length differ between these five species of bats and, if so, how does body
-length differ between the species?
+Does body length differ between these five species of bats and, if so, how does body length differ between the species?
 
 Following the same procedure, we first need to determine the correct statistical test and plot.
 
@@ -294,7 +291,6 @@ These species are in a similar arragement to the body mass comparison. Longest b
 modbls <- lm(body_length_mm ~ Species, data = bat)
 ```
 
-
 #### Check assumptions
 
 ```{r}
@@ -302,7 +298,6 @@ autoplot(modbls)
 ```
 
 Assumptions look good. Residuals vs. fits: the linear model seems appriate. Normal quantile plot: the points follow the line closely (normal residuals.) Scale-location plot: no trend (equal variance.) Additionally, the leverage plot doesn't have any points that seem unreasonable.
-
 
 #### Interpret the model
 
@@ -313,7 +308,7 @@ summary(modbls)
 
 Reject the null. We have statistically significant evidence that the mean body length (mm) is different among the species tested ($F_{4, 120} = 70.498$, $p < 2.2 * 10^{-16}$).
 
-Based on the individual t-tests, LACI > EPFU > LANO > MYLU > PESU in terms of mean body length, but we must conduct a Tukey HSD test to be sure.
+Based on the individual t-tests, LACI \> EPFU \> LANO \> MYLU \> PESU in terms of mean body length, but we must conduct a Tukey HSD test to be sure.
 
 ```{r}
 # need an aov() for TukeyHSD:
@@ -328,8 +323,7 @@ blsthsd<- glht(modbls, linfct = mcp(Species = "Tukey")) # object needed for disp
 cld(blsthsd)
 ```
 
-We see (from the output and display) that all the groups are statistically discernible from each other except MYLU and PESU. Their mean body lengths comparatively: LACI > EPFU > MYLU and PESU.
-
+We see (from the output and display) that all the groups are statistically discernible from each other except MYLU and PESU. Their mean body lengths comparatively: LACI \> EPFU \> MYLU and PESU.
 
 #### Final Figure:
 
@@ -354,8 +348,7 @@ ggplot(bat,aes(Species, body_length_mm, colour = Species))+
   theme_bw()
 ```
 
-We have statistically discernible evidence that there is a difference in mean body length (mm) among the species tested ($F_{4, 120} = 70.498$, $p < 2.2 * 10^{-16}$). Due to a significant Tukey HSD test (p << 0.05), all the species were statistically different from each other except MYLU and PESU, where no difference was observed. The mean body lengths are as follows: LACI > EPFU > LANO > MYLU & PESU.
-
+We have statistically discernible evidence that there is a difference in mean body length (mm) among the species tested ($F_{4, 120} = 70.498$, $p < 2.2 * 10^{-16}$). Due to a significant Tukey HSD test (p \<\< 0.05), all the species were statistically different from each other except MYLU and PESU, where no difference was observed. The mean body lengths are as follows: LACI \> EPFU \> LANO \> MYLU & PESU.
 
 ## Question C:
 
@@ -390,11 +383,9 @@ ggplot(total_ticks, aes(sex, sumt, fill = age))+
 
 Ticks seem to be the most common on adult males than any other combination of the groups. There seems to be a slight preference for males regardless of age, but overall there seems to be a relatively equal distribution of ticks among sex and age of bats, so I expect there will be no significant difference.
 
-
 #### Check assumptions
 
 The $\chi^2$ test has different assumptions than the linear models and these have to do with mutually exclusive categories (which is true in this case) and random sampling (which we assume is true.) So, there is no plot used to check these assumptions.
-
 
 #### Interpret Test
 
@@ -403,6 +394,7 @@ There is also no model associated with this test, but we need to convert the tot
 ```{r}
 (bat_mat <- xtabs(tick_num ~ sex + age, data = bat))
 ```
+
 Looks good -- these totals look the same as the plot.
 
 Now we are ready to run the $\chi^2$ test.
@@ -428,7 +420,6 @@ ggplot(total_ticks, aes(sex, sumt, fill = age))+
 
 We tested if there was an association between the number of ticks found on bats and their sex and age and we found no statistically different number of ticks among these groups ($\chi^2_1 = 0.33718$, p = 0.5615).
 
-
 ## Question D:
 
 Disregarding species, is there a relationship in bats between tail length and body length?
@@ -438,7 +429,6 @@ Response variable: tail length quantitative data. While these data are technical
 Predictor Variable: body length is also quantitative and should be treated as a continuous variable as these measurements on a continuous scale (even though the numbers themselves appear to be discrete).
 
 The appropriate test is a linear regression because we have two quantitative variables. The best plot is a scatterplot for the same reason.
-
 
 #### Plot
 
@@ -452,13 +442,11 @@ ggplot(bat, aes(body_length_mm, tail_length_mm))+
 
 There is a clear strong linear trend with these data where the longer the body length (mm) the longer the tail (positive correlation.) The slope appears to be approximately 0.5 and the intercept seems to be around 12.5. Since the data follow such a tight linear trend, I expect there to be a significant slope and a large $R^2$ value.
 
-
 #### Fit the model
 
 ```{r}
 modbltl <- lm(tail_length_mm ~ body_length_mm, data = bat)
 ```
-
 
 #### Check assumptions
 
@@ -472,15 +460,13 @@ autoplot(modbltl)
 
 Looks good. Residuals vs. fits looks sufficiently random, as well as th scale-location graph (linear fit and equal variance.) The points are very linear in the normal quantile plot, implying normal residuals. Also, there don't seem to be any concerning points in the residuals vs. leverage plot. With the assumptions met, we can move onto testing our model.
 
-
 #### Interpret the model
 
 ```{r}
 summary(modbltl)
 ```
 
-Reject the null. We have statistically discernible evidence that, with the bats sampled, as body length (mm) increases, tail length increases ($F_{1,123} = 1037$, adj $R^2 = 0.8931$, p < $2.2 * 10^{-16}$). The slope of the regression line that predicts tail length using body length is significantly larger than zero ($\beta$ = 0.614, p < $2.2 * 10^{-16}$).
-
+Reject the null. We have statistically discernible evidence that, with the bats sampled, as body length (mm) increases, tail length increases ($F_{1,123} = 1037$, adj $R^2 = 0.8931$, p \< $2.2 * 10^{-16}$). The slope of the regression line that predicts tail length using body length is significantly larger than zero ($\beta$ = 0.614, p \< $2.2 * 10^{-16}$).
 
 #### Final Figure:
 
@@ -497,6 +483,4 @@ ggplot(bat, aes(body_length_mm, tail_length_mm))+
 
 Linear regression model: $\widehat{Tail Length} = -14.837 + 0.614(Body Length)$
 
-We have statistically discernible evidence that the overall regression model was significant; as body length (mm) increases, tail length also probable to increase ($F_{1,123} = 1037$, adj $R^2 = 0.8931$, p < $2.2 * 10^{-16}$). Also, the slope of the regression line that predicts tail length using body length is significantly larger than zero ($\beta$ = 0.614, p < $2.2 * 10^{-16}$).
-
-
+We have statistically discernible evidence that the overall regression model was significant; as body length (mm) increases, tail length also probable to increase ($F_{1,123} = 1037$, adj $R^2 = 0.8931$, p \< $2.2 * 10^{-16}$). Also, the slope of the regression line that predicts tail length using body length is significantly larger than zero ($\beta$ = 0.614, p \< $2.2 * 10^{-16}$).
